@@ -19,6 +19,10 @@ app.get("/", function(req,res) {
   res.sendFile(__dirname + "/index.html");
 });
 
+app.get("/buyPc", function(req,res) {
+  res.sendFile(__dirname + "/blank.html")
+});
+
 
 
 //POST REQUESTS HANDLING
