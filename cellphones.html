@@ -9,7 +9,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>Dashboard</title>
+  <title>Buy Cellphone</title>
 
   <!-- Custom fonts for this template-->
   <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -64,7 +64,7 @@
 
       <!-- Nav Item - Utilities Collapse Menu -->
       <li class="nav-item">
-        <a class="nav-link" href="/buyCellphone">
+        <a class="nav-link" href="#">
           <i class="fas fa-fw fa-mobile-alt"></i>
           <span>Cell Phone</span>
         </a>
@@ -82,34 +82,30 @@
 
       <!-- Nav Item - Charts -->
       <li class="nav-item">
-        <a class="nav-link" href="#">
-
-          <span>iPhone X</span><br>
-          <span class="badge badge-light">5 units</span></a>
+        <a class="nav-link" href="charts.html">
+          <i class="fas fa-fw fa-chart-area"></i>
+          <span>Iphone X</span></a>
       </li>
 
       <!-- Nav Item - Tables -->
       <li class="nav-item">
-        <a class="nav-link" href="#">
-
-          <span>iPhone 7</span><br>
-          <span class="badge badge-light">2 units</span></a>
+        <a class="nav-link" href="tables.html">
+          <i class="fas fa-fw fa-table"></i>
+          <span>iPhone 7</span></a>
       </li>
 
       <!-- Nav Item - Tables -->
       <li class="nav-item">
-        <a class="nav-link" href="#">
-
-          <span>Samsung S8</span><br>
-          <span class="badge badge-light">0 units</span></a>
+        <a class="nav-link" href="tables.html">
+          <i class="fas fa-fw fa-table"></i>
+          <span>Samsung S8</span></a>
       </li>
 
       <!-- Nav Item - Tables -->
       <li class="nav-item">
-        <a class="nav-link" href="#">
-
-          <span>Huawei p10</span><br>
-          <span class="badge badge-light">0 units</span></a>
+        <a class="nav-link" href="tables.html">
+          <i class="fas fa-fw fa-table"></i>
+          <span>Huawei p10</span></a>
       </li>
 
       <!-- Divider -->
@@ -138,11 +134,11 @@
           </button>
 
           <!-- Topbar Search -->
-          <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100">
+          <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100" action="/buyPc" method="GET">
             <div class="input-group">
               <a href="/buyPc" class="btn btn-primary">Buy PC</a>
               <div class="topbar-divider d-none d-sm-block"></div>
-              <a href="/buyCellphone" class="btn btn-primary">Buy Smartphone</a>
+              <a href="#" class="btn btn-primary">Buy Smartphone</a>
             </div>
           </form>
 
@@ -187,106 +183,146 @@
         <!-- Begin Page Content -->
         <div class="container-fluid">
 
-          <!-- Page Heading -->
-          <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">BUY:</h1>
+          <h1 class="h2 mb-0 text-gray-800">Buy Cell Phone:</h1>
 
-          </div>
-
-
-          <!-- Content Row -->
           <div class="row">
-
-            <!-- Content Column -->
-            <div class="col-lg-6 mb-4">
-              <!-- Illustrations -->
-              <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                  <h6 class="m-0 font-weight-bold text-primary">PC</h6>
-                </div>
-                <div class="card-body">
-                  <div class="text-center">
-                    <img class="img-fluid px-3 px-sm-4 mt-3 mb-4" style="width: 25rem;" src="img/pc.svg" alt="">
+            <div class="col-sm-3">
+              <div class="accordion" id="accordionExample">
+                <div class="card">
+                  <div class="card-header" id="headingOne">
+                    <h2 class="mb-0">
+                      <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                        iPhone X
+                      </button>
+                    </h2>
                   </div>
 
-                  <a rel="nofollow" href="/buyPc">Buy PC &rarr;</a>
+                  <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
+                    <div class="card-body">
+                      Best smartphone ever!
+                    </div>
+                  </div>
+                </div>
+                <div class="card">
+                  <div class="card-header" id="headingTwo">
+                    <h2 class="mb-0">
+                      <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                        iPhone 7
+                      </button>
+                    </h2>
+                  </div>
+                  <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+                    <div class="card-body">
+                      Just the right phone for you!
+                    </div>
+                  </div>
+                </div>
+                <div class="card">
+                  <div class="card-header" id="headingThree">
+                    <h2 class="mb-0">
+                      <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                        Samsung S8
+                      </button>
+                    </h2>
+                  </div>
+                  <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
+                    <div class="card-body">
+                      The first in its class!
+                    </div>
+                  </div>
+                </div>
+                <div class="card">
+                  <div class="card-header" id="headingThree">
+                    <h2 class="mb-0">
+                      <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                        Huawei P10
+                      </button>
+                    </h2>
+                  </div>
+                  <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
+                    <div class="card-body">
+                      The most advanced phone!
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- Content Column -->
-            <div class="col-lg-6 mb-4">
 
-              <!-- Illustrations -->
-              <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                  <h6 class="m-0 font-weight-bold text-primary">Smartphone</h6>
-                </div>
-                <div class="card-body">
-                  <div class="text-center">
-                    <img class="img-fluid px-3 px-sm-4 mt-3 mb-4" style="width: 20rem;" src="img/smartphone.svg" alt="">
+            <div class="col-sm-6">
+              <h1 class="h3 mb-0 text-gray-800">Select model:</h1>
+              <br>
+              <div class="row">
+
+                <div class="col-sm-4">
+                  <div class="card" style="width: 12rem;">
+                    <div class="card-body">
+                      <h5 class="card-title">32 GB</h5>
+                      <p class="card-text">2 month warranty</p>
+                      <h6 class="card-subtitle mb-2">200$</h6>
+                    </div>
                   </div>
-
-                  <a target="_blank" rel="nofollow" href="/buyCellphone">Buy Smartphone &rarr;</a>
+                </div>
+                <div class="col-sm-4">
+                  <div class="card" style="width: 12rem;">
+                    <div class="card-body">
+                      <h5 class="card-title">128 GB</h5>
+                      <p class="card-text">4 month warranty</p>
+                      <h6 class="card-subtitle mb-2 text-muted">500$</h6>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-4">
+                  <div class="card" style="width: 12rem;">
+                    <div class="card-body">
+                      <h5 class="card-title">512 GB</h5>
+                      <p class="card-text">Life time warranty</p>
+                      <h6 class="card-subtitle mb-2 text-muted">700$</h6>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+              <br>
+              <br>
+              <h1 class="h3 mb-0 text-gray-800">Pay with Visa/MasterCard:</h1>
+              <br>
+              <div class="row" style="width: 25rem;">
+                <div class="col card">
+                  <form class="" style="padding: 5px;" action="index.html" method="post">
+                    <div class="form-group">
+                      <label>Card Number:</label>
+                      <input style="width: 18rem;" type="text" placeholder="Your credit card number">
 
+                    </div>
+                    <div class="form-group">
+                      <label>Cardholder Name:</label>
+                      <input style="width: 18rem;" type="text" placeholder="Your name">
+
+                    </div>
+                    <div class="form-group">
+                      <label>Expiration date:</label>
+                      <input style="width: 3rem;" type="text" placeholder="MM">
+                      <span>/</span>
+                      <input style="width: 3rem;" type="text" placeholder="YY">
+
+                    </div>
+                    <div class="form-group">
+                      <label>CVV:</label>
+                      <input style="width: 3rem;" type="text" placeholder="CVV">
+                    </div>
+
+                    <input type="submit" class="btn btn-primary" value="Submit Payment">
+                  </form>
+                </div>
+
+              </div>
+            </div>
           </div>
 
 
 
 
 
-
-
-
-          <!-- Page Heading -->
-          <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Comming Soon:</h1>
-
-          </div>
-
-
-          <!-- Content Row -->
-          <div class="row">
-
-            <!-- Content Column -->
-            <div class="col-lg-6 mb-4">
-              <!-- Illustrations -->
-              <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                  <h6 class="m-0 font-weight-bold text-primary">TV</h6>
-                </div>
-                <div class="card-body">
-                  <div class="text-center">
-                    <img class="img-fluid px-3 px-sm-4 mt-3 mb-4" style="width: 20rem;" src="img/tv.svg" alt="">
-                  </div>
-
-
-                </div>
-              </div>
-            </div>
-
-            <!-- Content Column -->
-            <div class="col-lg-6 mb-4">
-
-              <!-- Illustrations -->
-              <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                  <h6 class="m-0 font-weight-bold text-primary">Laptop</h6>
-                </div>
-                <div class="card-body">
-                  <div class="text-center">
-                    <img class="img-fluid px-3 px-sm-4 mt-3 mb-4" style="width: 20rem;" src="img/laptop.svg" alt="">
-                  </div>
-
-
-                </div>
-              </div>
-            </div>
-
-          </div>
 
         </div>
         <!-- /.container-fluid -->
