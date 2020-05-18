@@ -1,9 +1,8 @@
 {
   "ExpandedNodes": [
     "",
-    "\\public",
-    "\\public\\css"
+    "\\public"
   ],
-  "SelectedNode": "\\gulpfile.js",
+  "SelectedNode": "\\server.js",
   "PreviewInSolutionExplorer": false
 }
