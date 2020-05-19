@@ -10,6 +10,8 @@ $(document).ready(function(){
     $(".model2").removeClass("border-danger");
 
     $(".credit").hide();
+
+    $(".input-phone").attr("value", "0");
   });
 
   $(".phone1").on("click", function(){
@@ -23,6 +25,8 @@ $(document).ready(function(){
     $(".model2").removeClass("border-danger");
 
     $(".credit").hide();
+
+    $(".input-phone").attr("value", "1");
   });
 
   $(".phone2").on("click", function(){
@@ -36,8 +40,9 @@ $(document).ready(function(){
     $(".model2").removeClass("border-danger");
 
     $(".credit").hide();
-  });
 
+    $(".input-phone").attr("value", "2");
+  });
 
   $(".model0").on("click", function(){
     $(".model0").addClass("border-danger");
@@ -45,6 +50,8 @@ $(document).ready(function(){
     $(".model2").removeClass("border-danger");
 
     $(".credit").slideDown();
+
+    $(".input-model").attr("value", "0");
   });
 
   $(".model1").on("click", function(){
@@ -52,6 +59,8 @@ $(document).ready(function(){
     $(".model1").addClass("border-danger");
     $(".model2").removeClass("border-danger");
     $(".credit").slideDown();
+
+    $(".input-model").attr("value", "1");
   });
 
   $(".model2").on("click", function(){
@@ -59,5 +68,7 @@ $(document).ready(function(){
     $(".model1").removeClass("border-danger");
     $(".model2").addClass("border-danger");
     $(".credit").slideDown();
+
+    $(".input-model").attr("value", "2");
   });
 });
