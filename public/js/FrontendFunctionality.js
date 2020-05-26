@@ -1,4 +1,3 @@
-/*for sign up and log in fields validation*/
 function validateRegistrationFields() {
 
     // First Name 
@@ -16,6 +15,10 @@ function validateRegistrationFields() {
     if (!userMail.validity.valid || userMail.value == "") { setError("EmailValidation", "Must be valid email address"); }
     else { setValid("EmailValidation", "Must Be Valid Email Address"); }
 
+    validatePasswords();
+}
+
+function validatePasswords() {
     var userPassword = document.getElementById("InputPassword").value;
     var confirmationPassword = document.getElementById("RepeatPassword").value;
 
@@ -30,42 +33,6 @@ function validateRegistrationFields() {
     // password contain at least 1 digit
     if (userPassword.search(/[0-9]/) < 0) { setError("PasswordContainsAtLeastOneDigit", "Password must contain at least one digit"); }
     else { setValid("PasswordContainsAtLeastOneDigit", "Password must contain at least one digit"); }
-
-}
-
-/*for contact us fields validation*/
-function validateSuportFields() {
-    var userFullName = document.getElementById("name").value;
-    if (userFullName.length == 0) { alert("Please fill your name"); return false; }
-    var userMail = document.getElementById("email");
-    if (!userMail.validity.valid) { alert("Invalid Email Address"); return false; }
-    var selectedSubject = document.getElementById("subject").value;
-    if (selectedSubject == "Select Subject") { alert("Please select subject"); return false; }
-    var userComment = document.getElementById("comment").value;
-    if (userComment.length == 0) { alert("Please fill your message"); return false; }
-    else { alert(userFullName + "\n" + userMail.value + "\n" + selectedSubject + "\n" + userComment); return true; }
-}
-
-// show password
-function showPassword(mod) {
-    switch (document.getElementById("inpPassword").type) {
-        case "password":
-            document.getElementById("inpPassword").type = "text";
-            break;
-        case "text":
-            document.getElementById("inpPassword").type = "password";
-            break;
-    }
-    if (mod == "signUp") {
-        switch (document.getElementById("inpConPassword").type) {
-            case "password":
-                document.getElementById("inpConPassword").type = "text";
-                break;
-            case "text":
-                document.getElementById("inpConPassword").type = "password";
-                break;
-        }
-    }
 }
 
 // mark as green when the field is valid
@@ -81,3 +48,39 @@ function setError(id, value) {
     element.innerHTML = "X " + value;
     element.setAttribute("style", "display:block; color: #D71D1D;")
 }
+
+
+///*for contact us fields validation*/
+//function validateSuportFields() {
+//    var userFullName = document.getElementById("name").value;
+//    if (userFullName.length == 0) { alert("Please fill your name"); return false; }
+//    var userMail = document.getElementById("email");
+//    if (!userMail.validity.valid) { alert("Invalid Email Address"); return false; }
+//    var selectedSubject = document.getElementById("subject").value;
+//    if (selectedSubject == "Select Subject") { alert("Please select subject"); return false; }
+//    var userComment = document.getElementById("comment").value;
+//    if (userComment.length == 0) { alert("Please fill your message"); return false; }
+//    else { alert(userFullName + "\n" + userMail.value + "\n" + selectedSubject + "\n" + userComment); return true; }
+//}
+
+//// show password
+//function showPassword(mod) {
+//    switch (document.getElementById("inpPassword").type) {
+//        case "password":
+//            document.getElementById("inpPassword").type = "text";
+//            break;
+//        case "text":
+//            document.getElementById("inpPassword").type = "password";
+//            break;
+//    }
+//    if (mod == "signUp") {
+//        switch (document.getElementById("inpConPassword").type) {
+//            case "password":
+//                document.getElementById("inpConPassword").type = "text";
+//                break;
+//            case "text":
+//                document.getElementById("inpConPassword").type = "password";
+//                break;
+//        }
+//    }
+//}

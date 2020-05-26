@@ -19,14 +19,6 @@ let data = JSON.parse(rawdata);
 
 
 
-//TESTING CODE
-
-
-
-
-
-
-
 //GET REQUESTS HANDLING
 app.get("/", function (req, res) {
     res.sendFile(__dirname + "/login.html");
@@ -41,8 +33,8 @@ app.get("/register", function (req, res) {
 });
 
 
-//POST REQUESTS HANDLING
 
+//POST REQUESTS HANDLING
 
 
 
