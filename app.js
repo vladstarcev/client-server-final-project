@@ -67,6 +67,12 @@ app.get("/pconfirm", function(req, res) {
     purchases: purchases
   });
 });
+app.get("/about", function(req, res) {
+  res.render("about", {
+    cellphones: data,
+    purchases: purchases
+  });
+});
 
 //POST REQUESTS HANDLING
 app.post("/buyCellphone", function(req, res) {
