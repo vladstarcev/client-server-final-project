@@ -4,6 +4,8 @@ const bodyParser = require('body-parser');
 const request = require('request');
 const fs = require('fs');
 const ejs = require('ejs');
+const passport = require('passport');
+const FacebookStrategy = require('passport-facebook').Strategy;
 
 const app = express();
 
@@ -11,6 +13,24 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.use(bodyParser.json());
+app.use(passport.initialize());
+
+// LOGIN WITH FACEBOOK
+var FACEBOOK_APP_ID = '1094660150915546';
+var FACEBOOK_APP_SECRET = '8244fa995e24dcf0d0d6febed46b2156';
+passport.use(new FacebookStrategy({
+    clientID: FACEBOOK_APP_ID,
+    clientSecret: FACEBOOK_APP_SECRET,
+    callbackURL: 'http://localhost:3000/auth/facebook/callback'
+},
+    function (accessToken, refreshToken, profile, done) {
+        console.log(profile);
+        return done(null, profile);
+        //User.findOrCreate({ facebookId: profile.id }, function (err, user) {
+        //    return cb(err, user);
+        //});
+    }
+));
 
 //READING DATA FROM JSON
 let rawdata = fs.readFileSync('cell_phone_data.json');
@@ -34,7 +54,13 @@ app.get("/register", function (req, res) {
     res.sendFile(__dirname + "/register.html");
 });
 
+app.get('/updatePassword', function (req, res) {
+    res.sendFile(__dirname + '/PasswordUpdate.html');
+});
 
+app.get('/auth/facebook', passport.authenticate('facebook', { authType: 'reauthenticate', scope: ['email'] }));
+
+app.get('/auth/facebook/callback', passport.authenticate('facebook', { successRedirect: '/updatePassword', failureRedirect: '/', session: false }));
 
 
 //POST REQUESTS HANDLING
