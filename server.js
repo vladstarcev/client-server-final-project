@@ -58,8 +58,8 @@ app.get('/updatePassword', function (req, res) {
     res.sendFile(__dirname + '/PasswordUpdate.html');
 });
 
+// facebook redirections when loging in
 app.get('/auth/facebook', passport.authenticate('facebook', { authType: 'reauthenticate', scope: ['email'] }));
-
 app.get('/auth/facebook/callback', passport.authenticate('facebook', { successRedirect: '/updatePassword', failureRedirect: '/', session: false }));
 
 
