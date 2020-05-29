@@ -15,20 +15,37 @@ app.use(express.static('public'));
 app.use(bodyParser.json());
 app.use(passport.initialize());
 
+// VARIABLES AND DUMMY DB
+var users = [];
+var promoCodes = [
+    { id: 1, promoCode: '3XCRt', description: '10% discount' },
+    { id: 2, promoCode: '4DFG', description: 'My desc.' },
+    { id: 3, promoCode: '6DSQW', description: 'My new description.' }
+];
+
 // LOGIN WITH FACEBOOK
 var FACEBOOK_APP_ID = '1094660150915546';
 var FACEBOOK_APP_SECRET = '8244fa995e24dcf0d0d6febed46b2156';
 passport.use(new FacebookStrategy({
     clientID: FACEBOOK_APP_ID,
     clientSecret: FACEBOOK_APP_SECRET,
-    callbackURL: 'http://localhost:3000/auth/facebook/callback'
+    callbackURL: 'http://localhost:3000/auth/facebook/callback',
+    profileFields: ['emails', 'name']
 },
     function (accessToken, refreshToken, profile, done) {
-        console.log(profile);
-        return done(null, profile);
-        //User.findOrCreate({ facebookId: profile.id }, function (err, user) {
-        //    return cb(err, user);
-        //});
+        var user = {
+            email: profile.emails[0].value,
+            password: 'facebook',
+            firstName: profile.name.givenName,
+            lastName: profile.name.familyName,
+            promoCode: ''
+        }
+
+        if (!users.some(e => e.email === user.email))
+            users.push(user);
+
+        console.log(users);
+        return done(null, user);
     }
 ));
 
@@ -36,7 +53,6 @@ passport.use(new FacebookStrategy({
 let rawdata = fs.readFileSync('cell_phone_data.json');
 let data = JSON.parse(rawdata);
 
-//VARIABLES AND DUMMY DB
 
 
 
@@ -88,13 +104,7 @@ app.post("/verifyCaptcha", function (req, res) {
 });
 
 
-
-
-
-
-
-
-//SERVER SET UP ON PORT 8080
+//SERVER SET UP ON PORT 3000
 app.listen(3000, function () {
     console.log("Server is running on port 3000");
 });
