@@ -14,6 +14,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.use(bodyParser.json());
 app.use(passport.initialize());
+app.use(passport.session());
 
 // VARIABLES AND DUMMY DB
 var users = [];
@@ -49,6 +50,15 @@ passport.use(new FacebookStrategy({
     }
 ));
 
+passport.serializeUser(function (user, done) {
+    done(null, user);
+});
+
+passport.deserializeUser(function (user, done) {
+    done(null, user);
+});
+
+
 //READING DATA FROM JSON
 let rawdata = fs.readFileSync('cell_phone_data.json');
 let data = JSON.parse(rawdata);
@@ -76,7 +86,7 @@ app.get('/updatePassword', function (req, res) {
 
 // facebook redirections when loging in
 app.get('/auth/facebook', passport.authenticate('facebook', { authType: 'reauthenticate', scope: ['email'] }));
-app.get('/auth/facebook/callback', passport.authenticate('facebook', { successRedirect: '/updatePassword', failureRedirect: '/', session: false }));
+app.get('/auth/facebook/callback', passport.authenticate('facebook', { successRedirect: '/updatePassword', failureRedirect: '/'}));
 
 
 //POST REQUESTS HANDLING
