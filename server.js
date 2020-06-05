@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const request = require('request');
 const fs = require('fs');
 const ejs = require('ejs');
+const bcrypt = require('bcrypt');
 const passport = require('passport');
 const FacebookStrategy = require('passport-facebook').Strategy;
 
@@ -16,6 +17,7 @@ app.use(bodyParser.json());
 app.use(passport.initialize());
 app.use(passport.session());
 
+
 // VARIABLES AND DUMMY DB
 var users = [];
 var promoCodes = [
@@ -23,6 +25,7 @@ var promoCodes = [
     { id: 2, promoCode: '4DFG', description: 'My desc.' },
     { id: 3, promoCode: '6DSQW', description: 'My new description.' }
 ];
+
 
 // LOGIN WITH FACEBOOK
 var FACEBOOK_APP_ID = '1094660150915546';
@@ -45,7 +48,6 @@ passport.use(new FacebookStrategy({
         if (!users.some(e => e.email === user.email))
             users.push(user);
 
-        console.log(users);
         return done(null, user);
     }
 ));
@@ -84,9 +86,13 @@ app.get('/updatePassword', function (req, res) {
     res.sendFile(__dirname + '/PasswordUpdate.html');
 });
 
+app.get('/index', function (req, res) {
+    res.sendFile(__dirname + '/index.html');
+});
+
 // facebook redirections when loging in
 app.get('/auth/facebook', passport.authenticate('facebook', { authType: 'reauthenticate', scope: ['email'] }));
-app.get('/auth/facebook/callback', passport.authenticate('facebook', { successRedirect: '/updatePassword', failureRedirect: '/'}));
+app.get('/auth/facebook/callback', passport.authenticate('facebook', { successRedirect: '/index', failureRedirect: '/' }));
 
 
 //POST REQUESTS HANDLING
@@ -111,6 +117,38 @@ app.post("/verifyCaptcha", function (req, res) {
         // verification succeed
         return res.json({ "success": true, "message": "Captcha verification succeed" });
     });
+});
+
+app.post("/registerUser", async function (req, res) {
+    try {
+        var salt = await bcrypt.genSalt();
+        var hashedPassword = await bcrypt.hash(req.body.inputPassword, salt);
+
+        var user = {
+            email: req.body.inputEmail,
+            password: hashedPassword,
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            promoCode: req.body.promoCode
+        }
+
+        if (!users.some(e => e.email === user.email) && (promoCodes.some(e => e.promoCode === user.promoCode) || user.promoCode === '' || user.promoCode === null))
+            users.push(user);
+
+        res.redirect("/")
+    } catch { res.status(500).send(); }
+});
+
+app.post('/login', async function (req, res) {
+    var user = users.find(user => user.email === req.body.email);
+    if (user === null)
+        return res.status(400).send('Cannot find user. Please register first.');
+    try {
+        if (await bcrypt.compare(req.body.password, user.password))
+            res.redirect('/index');
+        else
+            res.send('Failed to login')
+    } catch { res.status(500).send(); }
 });
 
 

@@ -3,7 +3,8 @@
     "",
     "\\public",
     "\\public\\js",
-    "\\public\\js\\demo"
+    "\\public\\vendor",
+    "\\public\\vendor\\fontawesome-free"
   ],
   "SelectedNode": "\\server.js",
   "PreviewInSolutionExplorer": false

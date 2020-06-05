@@ -36,21 +36,21 @@
                             <div class="text-center">
                                 <h1 class="h4 text-gray-900 mb-4">Create an Account!</h1>
                             </div>
-                            <form class="user" id="registrationForm">
+                            <form class="user" id="registrationForm" action="/registerUser" method="post">
                                 <div class="form-group row">
                                     <div class="col-sm-6 mb-3 mb-sm-0">
-                                        <input type="text" class="form-control form-control-user" id="FirstName" placeholder="First Name">
+                                        <input type="text" class="form-control form-control-user" id="FirstName" placeholder="First Name" name="firstName">
                                     </div>
                                     <div class="col-sm-6">
-                                        <input type="text" class="form-control form-control-user" id="LastName" placeholder="Last Name">
+                                        <input type="text" class="form-control form-control-user" id="LastName" placeholder="Last Name" name="lastName">
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <input type="email" class="form-control form-control-user" id="InputEmail" placeholder="Email Address">
+                                    <input type="email" class="form-control form-control-user" id="InputEmail" placeholder="Email Address" name="inputEmail">
                                 </div>
                                 <div class="form-group row">
                                     <div class="col-sm-6 mb-3 mb-sm-0">
-                                        <input type="password" class="form-control form-control-user" id="InputPassword" placeholder="Password">
+                                        <input type="password" class="form-control form-control-user" id="InputPassword" placeholder="Password" name="inputPassword">
                                     </div>
                                     <div class="col-sm-6">
                                         <input type="password" class="form-control form-control-user" id="RepeatPassword" placeholder="Repeat Password">
@@ -58,13 +58,15 @@
                                 </div>
                                 <div class="form-group row">
                                     <div class="col-sm-6 mb-3 mb-sm-0">
-                                        <input type="text" class="form-control form-control-user" id="PromoCode" placeholder="Have a Promo Code">
+                                        <input type="text" class="form-control form-control-user" id="PromoCode" placeholder="Have a Promo Code" name="promoCode">
+                                    </div>
+                                    <div class="col-sm-6 mb-3 mb-sm-0" id="WrongPromoCode">
                                     </div>
                                 </div>
                                 <center class="g-recaptcha" data-sitekey="6Lclg_wUAAAAAFH99cKL7T4aTQ3yjKpcVFIg34aW"></center>
                                 <center id="recaptchaMessage"></center>
                                 <hr>
-                                <input type="submit" value="Register Account" class="btn btn-primary btn-user btn-block" onclick="validateRegistrationFields()">
+                                <input type="submit" value="Register Account" class="btn btn-primary btn-user btn-block">
                                 <a href="/auth/facebook" class="btn btn-facebook btn-user btn-block">
                                     <i class="fab fa-facebook-f fa-fw"></i> Register with Facebook
                                 </a>
@@ -104,7 +106,7 @@
     <script src="js/FrontendFunctionality.js"></script>
 
     <!--reCAPTCHA validation listener-->
-    <script>document.getElementById("registrationForm").addEventListener("submit", submitForm);</script>
+    <script>document.getElementById("registrationForm").addEventListener("submit", submitRegistrationForm);</script>
 </body>
 
 </html>
