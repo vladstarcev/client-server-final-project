@@ -8,6 +8,8 @@ const bcrypt = require('bcrypt');
 const passport = require('passport');
 const FacebookStrategy = require('passport-facebook').Strategy;
 
+
+
 const app = express();
 
 app.set('view engine', 'ejs');
@@ -16,6 +18,7 @@ app.use(express.static('public'));
 app.use(bodyParser.json());
 app.use(passport.initialize());
 app.use(passport.session());
+require('dotenv').config();
 
 
 // VARIABLES AND DUMMY DB
@@ -28,11 +31,9 @@ var promoCodes = [
 
 
 // LOGIN WITH FACEBOOK
-var FACEBOOK_APP_ID = '1094660150915546';
-var FACEBOOK_APP_SECRET = '8244fa995e24dcf0d0d6febed46b2156';
 passport.use(new FacebookStrategy({
-    clientID: FACEBOOK_APP_ID,
-    clientSecret: FACEBOOK_APP_SECRET,
+    clientID: process.env.FACEBOOK_APP_ID,
+    clientSecret: process.env.FACEBOOK_APP_SECRET,
     callbackURL: 'http://localhost:3000/auth/facebook/callback',
     profileFields: ['emails', 'name']
 },
@@ -104,7 +105,7 @@ app.post("/verifyCaptcha", function (req, res) {
     }
 
     // verification process
-    const seceretKey = "6Lclg_wUAAAAAOxx9MOtnLi5Rq9l9q18j5r3ZpYE";
+    const seceretKey = process.env.RECAPTCHA_SECRET_KEY;
     const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${seceretKey}&response=${response}&remoteip=${req.connection.remoteAddress}`;
     request(verifyUrl, function (error, response, body) {
         body = JSON.parse(body);
