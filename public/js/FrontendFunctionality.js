@@ -96,7 +96,7 @@ function submitRegistrationForm(event) {
 }
 
 // this function handles the reCAPTCHA response from server for the login page
-function submitLoginForm(event) {
+function submitForm(event) {
     event.preventDefault();
 
     const captcha = document.querySelector("#g-recaptcha-response").value;

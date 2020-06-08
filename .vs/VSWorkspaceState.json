@@ -2,9 +2,7 @@
   "ExpandedNodes": [
     "",
     "\\public",
-    "\\public\\js",
-    "\\public\\vendor",
-    "\\public\\vendor\\fontawesome-free"
+    "\\public\\js"
   ],
   "SelectedNode": "\\server.js",
   "PreviewInSolutionExplorer": false
