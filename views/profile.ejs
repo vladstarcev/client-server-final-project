@@ -1,129 +1,139 @@
 <%- include("header") -%>
 <!-- /start card1 -->
-<style>.valid {
-  color: green;
-}
+<style>
+  #message {
+    margin-left: 35px;
+  }
+  .card {
+    padding-left: 10px;
+  }
+  .valid {
+    color: green;
+  }
 
-.valid:before {
-  position: relative;
-  left: -35px;
-  content: "✔";
-}
+  .valid:before {
+    position: relative;
+    left: -35px;
+    content: "✔";
+  }
 
-/* Add a red text color and an "x" when the requirements are wrong */
-.invalid {
-  color: red;
-}
+  /* Add a red text color and an "x" when the requirements are wrong */
+  .invalid {
+    color: red;
+  }
 
-.invalid:before {
-  position: relative;
-  left: -35px;
-  content: "✖";
-}</style>
+  .invalid:before {
+    position: relative;
+    left: -35px;
+    content: "✖";
+  }
+</style>
 <!-- /start card1 -->
- <%= user.name %> 
-<div class="card">
-  <div class="card-header">
-    Profile details
-  </div>
-  <div class="body-card">
- 
-      <form>
-        <form>
-          <div class="form-row">
-            <div class="form-group col-md-2">
-              <label for="inputEmail4">firstname</label>
-              <input type="text" class="form-control" id="inputEmail4" placeholder="firstname">
-            </div>
-            <div class="form-group col-md-2">
-              <label for="inputPassword4">Last name</label>
-              <input type="text" class="form-control" id="inputEmail4" placeholder="Last name">
-            </div>
-            <div class="form-group col-md-2">
-              <label for="inputPassword4">Phone-number</label>
-              <input type="text" class="form-control" id="inputEmail4" placeholder="Phone-number">
-            </div>
-            <div class="form-group col-md-2">
-              <label for="inputState">Country</label>
-              <select id="inputState" class="form-control">
-                <option selected>Choose...</option>
-                <option>...</option>
-              </select>
-            </div>
-            </div>
-
-
-          </div>
-          
-         
-          <div class="form-row">
-            <div class="form-group col-md-2">
-              <label for="inputCity">E-mail</label>
-              <input type="email" class="form-control" id="Email">
-            </div>
-            <div class="form-group col-md-2">
-              <label for="inputState">City</label>
-              <select id="inputState" class="form-control">
-                <option selected>Choose...</option>
-                <option>Karmiel</option>
-              </select>
-            </div>
-            <div class="form-group col-md-2">
-              <label for="inputZip">Street</label>
-              <input type="text" class="form-control" id="inputZip" placeholder="Street">
-            </div>
-            <div class="form-group col-md-2">
-              <label for="inputZip">Zip code</label>
-              <input type="text" class="form-control" id="inputZip" placeholder="Zip code">
-            </div>
-          </div>
-       
-          <button type="submit" class="btn btn-primary">Change detiels</button>
-        </form>
-       
-      </form>
-
-  </div>
-      
-
-</div>
-
-<!-- /end card1 -->
-<!-- /start card2 -->
-<div class="card">
-  <div class="card-header">
-    Change password
-  </div>
-  <div class="card-body">
-   <form >
-    <div class="form-row">
-      <div class="form-group col-md-2">
-        <label for="inputZip">Old password</label>
-       <input type="password" id="oldpsw" placeholder="Old password" name="oldpsw" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" required>
+<%= user.name %>
+<form action="updateDetails" method="post">
+  <div class="card">
+    <div class="card-header">
+      Profile details
     </div>
-      </div>
-    
+    <div class="body-card">
+
+
+
       <div class="form-row">
         <div class="form-group col-md-2">
-          <label for="inputZip">New password</label>
-     <input type="password"  placeholder="New password"  id="psw1" name="psw1" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" required>
-     </div>
- 
-    <div class="form-group col-md-2">
-      <label for="inputZip">Confirm password</label>
-      <input type="password" id="psw2" placeholder="Confirm password" name="psw2" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" required>
-     </div>
+          <label for="inputEmail4">firstname</label>
+          <input type="text" class="form-control" id="inputEmail4" placeholder="firstname" value="<%=user.firstName%>">
+        </div>
+        <div class="form-group col-md-2">
+          <label for="inputPassword4">Last name</label>
+          <input type="text" class="form-control" id="inputEmail4" placeholder="Last name" value="<%=user.lastName%>">
+        </div>
+        <div class="form-group col-md-2">
+          <label for="inputPassword4">Phone-number</label>
+          <input type="text" class="form-control" id="inputEmail4" placeholder="Phone-number" value="<%=user.phone%>">
+        </div>
+        <div class="form-group col-md-2">
+          <label for="inputState">Country</label>
+          <select id="inputState" class="form-control">
+            <option selected><%=user.country%></option>
+            <option>...</option>
+          </select>
+        </div>
+      </div>
+
+
     </div>
-     <a href="#" class="btn btn-primary">Change password</a>
-   </form>
-   <div id="message">
-     Password must contain the following
-     <p id="same" class="invalid">A <b>same password</b></p>
-     <p id="number" class="invalid">A <b>number</b></p>
-     <p id="length" class="invalid">Minimum <b>6 characters</b></p>
-   </div>
- </div>
- </div>
+
+
+    <div class="form-row">
+      <div class="form-group col-md-2">
+        <label for="inputCity">Email</label>
+        <input type="email" class="form-control" id="Email" value="<%=user.email%>">
+      </div>
+      <div class="form-group col-md-2">
+        <label for="inputState">City</label>
+        <select id="inputState" class="form-control">
+          <option selected><%=user.city%></option>
+          <option>Karmiel</option>
+        </select>
+      </div>
+      <div class="form-group col-md-2">
+        <label for="inputZip">Street</label>
+        <input type="text" class="form-control" id="inputZip" placeholder="Street" value="<%=user.street%>">
+      </div>
+      <div class="form-group col-md-2">
+        <label for="inputZip">Zip code</label>
+        <input type="text" class="form-control" id="inputZip" placeholder="Zip code" value="<%=user.zip%>">
+      </div>
+    </div>
+    <div class="form-group">
+      <input type="submit" class="btn btn-primary btn-lg" value="Update">
+    </div>
+  </div>
+</form>
+<!-- /end card1 -->
+<!-- /start card2 -->
+<form action="changePassword" method="post">
+
+
+  <div class="card">
+    <div class="card-header">
+      Change password
+    </div>
+    <div class="card-body">
+      <form>
+        <div class="form-row">
+          <div class="form-group col-md-2">
+            <label for="inputZip">Old password</label>
+            <input type="password" id="oldpsw" placeholder="Old password" name="oldpsw" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
+              required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-md-2">
+            <label for="inputZip">New password</label>
+            <input type="password" placeholder="New password" id="psw1" name="psw1" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
+              required>
+          </div>
+
+          <div class="form-group col-md-2">
+            <label for="inputZip">Confirm password</label>
+            <input type="password" id="psw2" placeholder="Confirm password" name="psw2" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
+              required>
+          </div>
+        </div>
+        <a href="#" class="btn btn-primary">Change password</a>
+      </form>
+      <div id="message">
+        Password must contain the following
+        <p id="same" class="invalid">A <b>same password</b></p>
+        <p id="number" class="invalid">A <b>number</b></p>
+        <p id="length" class="invalid">Minimum <b>6 characters</b></p>
+      </div>
+    </div>
+  </div>
+</form>
 <!-- /end card2 -->
 <script>
   var myInput1 = document.getElementById("psw1");
@@ -132,12 +142,12 @@
 
   var number = document.getElementById("number");
   var length = document.getElementById("length");
-  
+
   // When the user clicks on the password field, show the message box
   myInput1.onfocus = function() {
     document.getElementById("message").style.display = "block";
   }
-  
+
   // When the user clicks outside of the password field, hide the message box
   myInput1.onblur = function() {
     document.getElementById("message").style.display = "none";
@@ -146,7 +156,7 @@
   myInput2.onfocus = function() {
     document.getElementById("message").style.display = "block";
   }
-  
+
   // When the user clicks outside of the password field, hide the message box
   myInput2.onblur = function() {
     document.getElementById("message").style.display = "none";
@@ -156,10 +166,10 @@
   myInput1.onkeyup = function() {
     // Validate same letters
 
-  
+
     // Validate numbers
     var numbers = /[0-9]/g;
-    if(myInput1.value.match(numbers)) {  
+    if (myInput1.value.match(numbers)) {
       number.classList.remove("invalid");
       number.classList.add("valid");
     } else {
@@ -167,27 +177,25 @@
       number.classList.add("invalid");
     }
     // Validate length
-    if(myInput1.value.length >= 6) {
+    if (myInput1.value.length >= 6) {
       length.classList.remove("invalid");
       length.classList.add("valid");
     } else {
       length.classList.remove("valid");
       length.classList.add("invalid");
     }
-    if(myInput2.value==myInput1.value)
-{  
+    if (myInput2.value == myInput1.value) {
       same.classList.remove("invalid");
       same.classList.add("valid");
     } else {
       same.classList.remove("valid");
       same.classList.add("invalid");
     }
-  
+
   }
   myInput2.onkeyup = function() {
     // Validate same letters
-if(myInput2.value==myInput1.value && myInput2.value!='')
-{  
+    if (myInput2.value == myInput1.value && myInput2.value != '') {
       same.classList.remove("invalid");
       same.classList.add("valid");
     } else {
@@ -195,11 +203,6 @@ if(myInput2.value==myInput1.value && myInput2.value!='')
       same.classList.add("invalid");
     }
   }
+</script>
 
-
-
-
-
-  </script>
-  
 <%- include("footer") -%>

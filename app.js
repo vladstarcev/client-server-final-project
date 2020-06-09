@@ -21,6 +21,18 @@ let data = JSON.parse(rawdata);
 //VARIABLES AND DUMMY DB
 var transactions = [];
 var purchases = [0, 0, 0, 0];
+var temp_user = {
+  username: "Barak Obama",
+  password: "123",
+  firstName: "Barak",
+  lastName: "Obama",
+  phone: "123456",
+  country: "USA",
+  email: "bobama@gmail.com",
+  city: "New York",
+  street: "Palm Street",
+  zip: "123456"
+}
 
 //CREATING POSTGRES CLIENT
 const client = new Client({
@@ -43,28 +55,40 @@ const client = new Client({
 app.get("/", function(req, res) {
   res.render("main", {
     cellphones: data,
-    purchases: purchases
+    purchases: purchases,
+    user: temp_user
   });
 });
 
 app.get("/buyPc", function(req, res) {
   res.render("buyPc", {
     cellphones: data,
-    purchases: purchases
+    purchases: purchases,
+    user: temp_user
   });
 });
 
 app.get("/buyCellphone", function(req, res) {
   res.render("cellphones", {
     cellphones: data,
-    purchases: purchases
+    purchases: purchases,
+    user: temp_user
   });
 });
 
 app.get("/pconfirm", function(req, res) {
   res.render("pconfirm", {
     cellphones: data,
-    purchases: purchases
+    purchases: purchases,
+    user: temp_user
+  });
+});
+
+app.get("/profile", function(req, res) {
+  res.render("profile", {
+    cellphones: data,
+    purchases: purchases,
+    user: temp_user
   });
 });
 
@@ -95,7 +119,7 @@ app.post("/buyCellphone", function(req, res) {
         product: data[userInput.phone].id,
         model: data[userInput.phone].models[userInput.model].type,
         date: dateString,
-        user: "Valerie Luna",
+        user: temp_user.username,
         price: userInput.price,
         local_price: lp + "ILS",
         total_price: tp + "ILS",
