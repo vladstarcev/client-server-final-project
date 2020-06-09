@@ -1,6 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-
 <head>
 
     <meta charset="utf-8">
@@ -12,12 +9,11 @@
     <title>Update Password</title>
 
     <!-- Custom fonts for this template-->
-    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
 
     <!-- Custom styles for this template-->
-    <link href="css/sb-admin-2.min.css" rel="stylesheet">
-
+    <link href="/css/sb-admin-2.min.css" rel="stylesheet">
 </head>
 
 <body class="bg-gradient-primary">
@@ -32,19 +28,17 @@
                             <div class="text-center">
                                 <h1 class="h4 text-gray-900 mb-4">Update Password!</h1>
                             </div>
-                            <form class="user">
+                            <form class="user" action="/reset/<%= token %>" method="post">
                                 <div class="form-group row">
                                     <div class="col-sm-6 mb-3 mb-sm-0">
-                                        <input type="password" class="form-control form-control-user" id="InputPassword" placeholder="Password">
+                                        <input type="password" class="form-control form-control-user" name="password" id="InputPassword" placeholder="Password">
                                     </div>
                                     <div class="col-sm-6">
-                                        <input type="password" class="form-control form-control-user" id="RepeatPassword" placeholder="Repeat Password">
+                                        <input type="password" class="form-control form-control-user" name="confirm" id="RepeatPassword" placeholder="Repeat Password">
                                     </div>
                                 </div>
                                 <hr>
-                                <a href="#" class="btn btn-primary btn-user btn-block" onclick="validatePasswords()">
-                                    Update Password
-                                </a>
+                                <input type="submit" class="btn btn-primary btn-user btn-block" value="Update Password" onclick="validatePasswords()">
                             </form>
                             <center id="PasswordsMatch"></center>
                             <center id="PasswordContainsSixCharacters"></center>
@@ -70,5 +64,3 @@
     <script src="js/FrontendFunctionality.js"></script>
 
 </body>
-
-</html>

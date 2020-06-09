@@ -19,7 +19,7 @@
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
 
     <!-- For the reCaptcha -->
-    <script src='https://www.google.com/recaptcha/api.js'></script>
+    <script src='https://www.google.com/recaptcha/api.js' async defer></script>
 
 </head>
 
@@ -36,21 +36,21 @@
                             <div class="text-center">
                                 <h1 class="h4 text-gray-900 mb-4">Create an Account!</h1>
                             </div>
-                            <form class="user">
+                            <form class="user" id="registrationForm" action="/register" method="post">
                                 <div class="form-group row">
                                     <div class="col-sm-6 mb-3 mb-sm-0">
-                                        <input type="text" class="form-control form-control-user" id="FirstName" placeholder="First Name">
+                                        <input type="text" class="form-control form-control-user" id="FirstName" placeholder="First Name" name="firstName">
                                     </div>
                                     <div class="col-sm-6">
-                                        <input type="text" class="form-control form-control-user" id="LastName" placeholder="Last Name">
+                                        <input type="text" class="form-control form-control-user" id="LastName" placeholder="Last Name" name="lastName">
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <input type="email" class="form-control form-control-user" id="InputEmail" placeholder="Email Address">
+                                    <input type="email" class="form-control form-control-user" id="InputEmail" placeholder="Email Address" name="inputEmail">
                                 </div>
                                 <div class="form-group row">
                                     <div class="col-sm-6 mb-3 mb-sm-0">
-                                        <input type="password" class="form-control form-control-user" id="InputPassword" placeholder="Password">
+                                        <input type="password" class="form-control form-control-user" id="InputPassword" placeholder="Password" name="inputPassword">
                                     </div>
                                     <div class="col-sm-6">
                                         <input type="password" class="form-control form-control-user" id="RepeatPassword" placeholder="Repeat Password">
@@ -58,15 +58,16 @@
                                 </div>
                                 <div class="form-group row">
                                     <div class="col-sm-6 mb-3 mb-sm-0">
-                                        <input type="text" class="form-control form-control-user" id="PromoCode" placeholder="Have a Promo Code">
+                                        <input type="text" class="form-control form-control-user" id="PromoCode" placeholder="Have a Promo Code" name="promoCode">
+                                    </div>
+                                    <div class="col-sm-6 mb-3 mb-sm-0" id="WrongPromoCode">
                                     </div>
                                 </div>
-                                <center class="g-recaptcha" data-sitekey="6Ldf2fYUAAAAAJg3vPrRA11uQnAgG1PnCnjEIAaw"></center>
+                                <center class="g-recaptcha" data-sitekey="6Lclg_wUAAAAAFH99cKL7T4aTQ3yjKpcVFIg34aW"></center>
+                                <center id="recaptchaMessage"></center>
                                 <hr>
-                                <a href="#" class="btn btn-primary btn-user btn-block" onclick="validateRegistrationFields()">
-                                    Register Account
-                                </a>
-                                <a href="index.html" class="btn btn-facebook btn-user btn-block">
+                                <input type="submit" value="Register Account" class="btn btn-primary btn-user btn-block">
+                                <a href="/auth/facebook" class="btn btn-facebook btn-user btn-block">
                                     <i class="fab fa-facebook-f fa-fw"></i> Register with Facebook
                                 </a>
                             </form>
@@ -88,7 +89,7 @@
             <center id="PasswordContainsSixCharacters"></center>
             <center id="PasswordContainsAtLeastOneDigit"></center>
         </div>
-            
+
     </div>
 
     <!-- Bootstrap core JavaScript-->
@@ -101,8 +102,11 @@
     <!-- Custom scripts for all pages-->
     <script src="js/sb-admin-2.min.js"></script>
 
-    <!--For fields validation-->
+    <!--For fields and captcha validation-->
     <script src="js/FrontendFunctionality.js"></script>
+
+    <!--reCAPTCHA validation listener-->
+    <script>document.getElementById("registrationForm").addEventListener("submit", submitRegistrationForm);</script>
 </body>
 
 </html>

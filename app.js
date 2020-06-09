@@ -91,6 +91,12 @@ app.get("/profile", function(req, res) {
     user: temp_user
   });
 });
+app.get("/about", function(req, res) {
+  res.render("about", {
+    cellphones: data,
+    purchases: purchases
+  });
+});
 
 //POST REQUESTS HANDLING
 app.post("/buyCellphone", function(req, res) {
