@@ -284,7 +284,7 @@ app.post('/login', async function(req, res) {
         password: result.rows[0].Password
       }
 
-      if (bcrypt.compare(req.body.password, user.password)) {
+      if (await bcrypt.compare(req.body.password, user.password)) {
         res.render("main", {
           cellphones: data,
           purchases: purchases,
