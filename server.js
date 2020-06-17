@@ -11,9 +11,12 @@ const nodemailer = require('nodemailer');
 const async = require('async');
 const crypto = require('crypto');
 const https = require('https');
-const {Client} = require('pg');
+const {
+  Client
+} = require('pg');
 
 const app = express();
+const saltRounds = 10;
 
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({
@@ -28,7 +31,6 @@ require('dotenv').config();
 
 // VARIABLES AND DUMMY DB
 var transactions = [];
-var purchases = [0, 0, 0, 0];
 var users = [];
 var resetPasswordRequests = [];
 var promoCodes = [{
@@ -47,27 +49,10 @@ var promoCodes = [{
     description: 'My new description.'
   }
 ];
-var temp_user = {
-  username: "Barak Obama",
-  password: "123",
-  firstName: "Barak",
-  lastName: "Obama",
-  phone: "123456",
-  country: "USA",
-  email: "bobama@gmail.com",
-  city: "New York",
-  street: "Palm Street",
-  zip: "123456"
-}
+var temp_user;
 
 //CREATING POSTGRES CLIENT
-const client = new Client({
-  user: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
-  host: 'localhost',
-  database: process.env.POSTGRES_DATABASE,
-  port: process.env.POSTGRES_PORT
-});
+
 
 // LOGIN WITH FACEBOOK
 passport.use(new FacebookStrategy({
@@ -132,7 +117,6 @@ app.get("/register", function(req, res) {
 app.get("/buyPc", function(req, res) {
   res.render("buyPc", {
     cellphones: data,
-    purchases: purchases,
     user: temp_user
   });
 });
@@ -140,7 +124,6 @@ app.get("/buyPc", function(req, res) {
 app.get("/buyCellphone", function(req, res) {
   res.render("cellphones", {
     cellphones: data,
-    purchases: purchases,
     user: temp_user
   });
 });
@@ -148,22 +131,46 @@ app.get("/buyCellphone", function(req, res) {
 app.get("/pconfirm", function(req, res) {
   res.render("pconfirm", {
     cellphones: data,
-    purchases: purchases,
     user: temp_user
   });
 });
 
 app.get("/profile", function(req, res) {
-  res.render("profile", {
-    cellphones: data,
-    purchases: purchases,
-    user: temp_user
+  const myclient = new Client({
+    user: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
+    host: 'localhost',
+    database: process.env.POSTGRES_DATABASE,
+    port: process.env.POSTGRES_PORT
   });
+  const query_string = 'SELECT * FROM "Users" WHERE "Email"=$1';
+  const values = [temp_user.username];
+  console.log("Temp User: ", temp_user.username);
+
+  myclient.connect();
+  myclient.query(query_string, values, (err, result) => {
+    if (err) {
+      console.log("Error occured");
+      console.log(err);
+    } else {
+      console.log("This is profile route: ", result.rows);
+    }
+    const user = {
+      firstName: result.rows[0].Name,
+      lastName: result.rows[0].FamilyName
+    }
+    res.render("profile", {
+      cellphones: data,
+      user: temp_user,
+      data: result.rows[0]
+    });
+    myclient.end();
+  });
+
 });
 app.get("/about", function(req, res) {
   res.render("about", {
     cellphones: data,
-    purchases: purchases,
     user: temp_user
   });
 });
@@ -193,6 +200,41 @@ app.get('/auth/facebook/callback', passport.authenticate('facebook', {
   failureRedirect: '/'
 }));
 
+app.get("/logout", function(req,res) {
+  temp_user = null;
+  res.redirect("/");
+});
+
+app.get("/main", function(req, res) {
+  if (temp_user) {
+    const client = new Client({
+      user: process.env.POSTGRES_USER,
+      password: process.env.POSTGRES_PASSWORD,
+      host: 'localhost',
+      database: process.env.POSTGRES_DATABASE,
+      port: process.env.POSTGRES_PORT
+    });
+    const query_string = 'SELECT * FROM "Users" WHERE "Email"=$1';
+    const values = [temp_user.username];
+
+    client.connect();
+    client.query(query_string, values, (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log(result.rows);
+        res.render("main", {
+          cellphones: data,
+          user: temp_user
+        });
+      }
+      client.end();
+    });
+  } else {
+    res.redirect("/");
+  }
+
+});
 
 //POST REQUESTS HANDLING
 app.post("/verifyCaptcha", function(req, res) {
@@ -242,6 +284,13 @@ app.post("/register", async function(req, res) {
 
     if (!users.some(e => e.email === user.email) && (promoCodes.some(e => e.promoCode === user.promoCode) || user.promoCode === '' || user.promoCode === null)) {
       //users.push(user);
+      const client = new Client({
+        user: process.env.POSTGRES_USER,
+        password: process.env.POSTGRES_PASSWORD,
+        host: 'localhost',
+        database: process.env.POSTGRES_DATABASE,
+        port: process.env.POSTGRES_PORT
+      });
       const query_string = 'INSERT INTO "Users" ("Name", "FamilyName", "Email", "PromoCode", "Password") VALUES ($1, $2, $3, $4, $5)';
       const values = [user.firstName, user.lastName, user.email, user.promoCode, hashedPassword];
 
@@ -258,16 +307,44 @@ app.post("/register", async function(req, res) {
     //res.redirect("/index")
     res.render("main", {
       cellphones: data,
-      purchases: purchases,
-      user: user
+      user: temp_user
     });
   } catch {
     res.status(500).send();
   }
 });
 
-app.post('/login', async function(req, res) {
+app.post('/updateDetails', function(req, res) {
+  const client = new Client({
+    user: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
+    host: 'localhost',
+    database: process.env.POSTGRES_DATABASE,
+    port: process.env.POSTGRES_PORT
+  });
+  const query_string = 'UPDATE "Users" SET ("Name","FamilyName","PhoneNumber","Country","City","Street","ZipCode") = ($1,$2,$3,$4,$5,$6,$7) WHERE "Email"=$8';
+  const values = [req.body.firstName, req.body.lastName, req.body.phone, req.body.country, req.body.city, req.body.street, req.body.zip, temp_user.username];
 
+  client.connect();
+  client.query(query_string, values, (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(result);
+      res.redirect("main");
+    }
+    client.end();
+  });
+});
+
+app.post('/login', function(req, res) {
+  const client = new Client({
+    user: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
+    host: 'localhost',
+    database: process.env.POSTGRES_DATABASE,
+    port: process.env.POSTGRES_PORT
+  });
   const query_string = 'SELECT * FROM "Users" WHERE "Email"=$1';
   const values = [req.body.email];
 
@@ -276,24 +353,39 @@ app.post('/login', async function(req, res) {
     if (err) {
       console.log(err);
     } else {
-      console.log(result.rows);
-      const user = {
-        firstName: result.rows[0].Name,
-        lastName: result.rows[0].FamilyName,
-        email: result.rows[0].Email,
-        password: result.rows[0].Password
+
+      console.log("This is login route: ", result.rows);
+      temp_user = {
+        username: result.rows[0].Email,
+        firstname: result.rows[0].Name,
+        lastname: result.rows[0].FamilyName,
+        purchases: [0, 0, 0, 0]
       }
 
-      if (await bcrypt.compare(req.body.password, user.password)) {
-        res.render("main", {
-          cellphones: data,
-          purchases: purchases,
-          user: user
-        });
-      } else
-        res.send('Failed to login')
+      const query_string2 = 'SELECT * FROM "Transactions" WHERE "User"=$1';
+      const values2 = [temp_user.username];
+
+      client.query(query_string2, values2, (err, result2) => {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log("Transactions selected");
+          console.log(result2.rows);
+          result2.rows.forEach(item => {
+            if (item.Product == "iPhone X") temp_user.purchases[0]++;
+            if (item.Product == "iPhone 7") temp_user.purchases[1]++;
+            if (item.Product == "Samsung S8") temp_user.purchases[2]++;
+            if (item.Product == "Huawei P10") temp_user.purchases[3]++;
+          });
+          console.log(temp_user.purchases);
+        }
+        client.end();
+        if (bcrypt.compare(req.body.password, result.rows[0].Password)) {
+          res.redirect("main");
+        } else
+          res.send('Failed to login');
+      });
     }
-    client.end();
   });
 
   // var user = users.find(user => user.email === req.body.email);
@@ -366,6 +458,47 @@ app.post('/forgotPassword', function(req, res, next) {
   res.redirect('/');
 });
 
+app.post("/changePassword", function(req, res) {
+
+  const client = new Client({
+    user: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
+    host: 'localhost',
+    database: process.env.POSTGRES_DATABASE,
+    port: process.env.POSTGRES_PORT
+  });
+  const query_string1 = 'SELECT * FROM "Users" WHERE "Email"=$1';
+  const values1 = [temp_user.username];
+
+  client.connect();
+  client.query(query_string1, values1, (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log("user found");
+      if (bcrypt.compare(req.body.oldPass, result.rows[0].Password)) {
+        bcrypt.hash(req.body.newPass, saltRounds, function(err, hash) {
+          if (err) {
+            console.log(err);
+          } else {
+            const query_string2 = 'UPDATE "Users" SET "Password" = $1 WHERE "Email" = $2';
+            const values2 = [hash, temp_user.username];
+
+            client.query(query_string2, values2, (err, result2) => {
+              if (err) {
+                console.log(err);
+              } else {
+                console.log("password updated", result2);
+                res.redirect("main");
+              }
+              client.end();
+            });
+          }
+        });
+      }
+    }
+  });
+});
 app.post('/reset/:token', async function(req, res) {
   var resetRequest = resetPasswordRequests.find(request => request.resetPasswordToken === req.params.token);
   async.waterfall([
@@ -424,6 +557,14 @@ app.post('/reset/:token', async function(req, res) {
 });
 
 app.post("/buyCellphone", function(req, res) {
+  const client = new Client({
+    user: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
+    host: 'localhost',
+    database: process.env.POSTGRES_DATABASE,
+    port: process.env.POSTGRES_PORT
+  });
+
   var userInput = {
     phone: req.body.phone,
     model: req.body.model,
@@ -445,7 +586,6 @@ app.post("/buyCellphone", function(req, res) {
       var lp = Number(userInput.price.slice(0, userInput.price.length - 1)) * exchangeRate;
       var tp = lp + lp * 17 / 100;
       var t = {
-        id: (transactions.length + 1),
         product: data[userInput.phone].id,
         model: data[userInput.phone].models[userInput.model].type,
         date: dateString,
@@ -456,16 +596,11 @@ app.post("/buyCellphone", function(req, res) {
         number: userInput.number,
         name: userInput.name,
         exp_date: userInput.month + '/' + userInput.year,
-        cvv: userInput.cvv,
-        memo: ""
+        cvv: userInput.cvv
       };
-      const query_string = "INSERT INTO transactions VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)";
-      const values = [t.id, t.product, t.model, t.date, t.user, t.price, t.local_price, t.total_price, t.number, t.name, t.exp_date, t.cvv, t.memo];
-      transactions.push(t);
-      purchases[req.body.phone]++;
-
-      console.log(transactions);
-      console.log(purchases);
+      const query_string = 'INSERT INTO "Transactions" ("Product","Model","Date","User","Price","LocalPrice","TotalPriceIncludingVAT","Number","Name","ExpDate","CVV") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)';
+      const values = [t.product, t.model, t.date, t.user, t.price, t.local_price, t.total_price, t.number, t.name, t.exp_date, t.cvv];
+      temp_user.purchases[req.body.phone]++;
 
       client.connect();
       client.query(query_string, values, (err, res) => {
