@@ -59,21 +59,29 @@ passport.use(new FacebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID,
     clientSecret: process.env.FACEBOOK_APP_SECRET,
     callbackURL: 'http://localhost:3000/auth/facebook/callback',
+    //callbackURL: 'http://localhost:3000/main',
     profileFields: ['emails', 'name']
   },
   function(accessToken, refreshToken, profile, done) {
-    var user = {
-      email: profile.emails[0].value,
-      password: 'facebook',
-      firstName: profile.name.givenName,
-      lastName: profile.name.familyName,
-      promoCode: ''
+    // var user = {
+    //   email: profile.emails[0].value,
+    //   password: 'facebook',
+    //   firstName: profile.name.givenName,
+    //   lastName: profile.name.familyName,
+    //   promoCode: ''
+    // }
+
+    temp_user = {
+      username: profile.emails[0].value,
+      firstname: profile.name.givenName,
+      lastname: profile.name.familyName,
+      purchases: [0,0,0,0]
     }
+    console.log(temp_user);
+    // if (!users.some(e => e.email === user.email))
+    //   users.push(user);
 
-    if (!users.some(e => e.email === user.email))
-      users.push(user);
-
-    return done(null, user);
+    return done(null, temp_user);
   }
 ));
 
@@ -195,8 +203,9 @@ app.get('/auth/facebook', passport.authenticate('facebook', {
   authType: 'reauthenticate',
   scope: ['email']
 }));
+
 app.get('/auth/facebook/callback', passport.authenticate('facebook', {
-  successRedirect: '/index',
+  successRedirect: '/main',
   failureRedirect: '/'
 }));
 
