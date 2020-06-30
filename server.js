@@ -51,7 +51,6 @@ var promoCodes = [{
 ];
 var temp_user;
 
-//CREATING POSTGRES CLIENT
 
 
 // LOGIN WITH FACEBOOK
@@ -63,25 +62,79 @@ passport.use(new FacebookStrategy({
     profileFields: ['emails', 'name']
   },
   function(accessToken, refreshToken, profile, done) {
-    // var user = {
-    //   email: profile.emails[0].value,
-    //   password: 'facebook',
-    //   firstName: profile.name.givenName,
-    //   lastName: profile.name.familyName,
-    //   promoCode: ''
-    // }
+    const client = new Client({
+      user: process.env.POSTGRES_USER,
+      password: process.env.POSTGRES_PASSWORD,
+      host: 'localhost',
+      database: process.env.POSTGRES_DATABASE,
+      port: process.env.POSTGRES_PORT
+    });
+    const query_string = 'SELECT * FROM "Users" WHERE "Email"=$1';
+    const values = [profile.emails[0].value];
 
-    temp_user = {
-      username: profile.emails[0].value,
-      firstname: profile.name.givenName,
-      lastname: profile.name.familyName,
-      purchases: [0,0,0,0]
-    }
-    console.log(temp_user);
-    // if (!users.some(e => e.email === user.email))
-    //   users.push(user);
+    client.connect();
+    client.query(query_string, values, (err, result) => {
+      if (err) {
+        console.log(err);
+      }
+      if (result.rows.length) {
+        //USER IS ALREADY REGISTERED
+        console.log("This user is registered: ", result.rows);
 
-    return done(null, temp_user);
+        temp_user = {
+          username: profile.emails[0].value,
+          firstname: profile.name.givenName,
+          lastname: profile.name.familyName,
+          purchases: [0, 0, 0, 0]
+        }
+
+        const query_string2 = 'SELECT * FROM "Transactions" WHERE "User"=$1';
+        const values2 = [profile.emails[0].value];
+
+        client.query(query_string2, values2, (err, result2) => {
+          if (err) {
+            console.log(err);
+          } else {
+            console.log("Transactions selected");
+            console.log(result2.rows);
+            result2.rows.forEach(item => {
+              if (item.Product == "iPhone X") temp_user.purchases[0]++;
+              if (item.Product == "iPhone 7") temp_user.purchases[1]++;
+              if (item.Product == "Samsung S8") temp_user.purchases[2]++;
+              if (item.Product == "Huawei P10") temp_user.purchases[3]++;
+            });
+            console.log(temp_user.purchases);
+          }
+          client.end();
+          return done(null, temp_user);
+        });
+      } else {
+        //USER IS NOT REGISTERED
+        console.log("This user is not registered");
+        temp_user = {
+          username: profile.emails[0].value,
+          firstname: profile.name.givenName,
+          lastname: profile.name.familyName,
+          purchases: [0, 0, 0, 0]
+        }
+
+        bcrypt.hash(profile.id, saltRounds, function(err, hash) {
+          if (err) {
+            console.log(err);
+          } else {
+            console.log("Im in register via facebook");
+            const query_string3 = 'INSERT INTO "Users" ("Name", "FamilyName", "Email", "Password") VALUES ($1, $2, $3, $4)';
+            const values3 = [profile.name.givenName, profile.name.familyName, profile.emails[0].value, hash];
+
+            client.query(query_string3, values3, (err, result3) => {
+              console.log(result3);
+              client.end();
+              return done(null, temp_user);
+            });
+          }
+        });
+      }
+    });
   }
 ));
 
@@ -209,40 +262,20 @@ app.get('/auth/facebook/callback', passport.authenticate('facebook', {
   failureRedirect: '/'
 }));
 
-app.get("/logout", function(req,res) {
+app.get("/logout", function(req, res) {
   temp_user = null;
   res.redirect("/");
 });
 
 app.get("/main", function(req, res) {
   if (temp_user) {
-    const client = new Client({
-      user: process.env.POSTGRES_USER,
-      password: process.env.POSTGRES_PASSWORD,
-      host: 'localhost',
-      database: process.env.POSTGRES_DATABASE,
-      port: process.env.POSTGRES_PORT
-    });
-    const query_string = 'SELECT * FROM "Users" WHERE "Email"=$1';
-    const values = [temp_user.username];
-
-    client.connect();
-    client.query(query_string, values, (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        console.log(result.rows);
-        res.render("main", {
-          cellphones: data,
-          user: temp_user
-        });
-      }
-      client.end();
+    res.render("main", {
+      cellphones: data,
+      user: temp_user
     });
   } else {
-    res.redirect("/");
-  }
-
+  res.redirect("/");
+}
 });
 
 //POST REQUESTS HANDLING
@@ -279,6 +312,7 @@ app.post("/verifyCaptcha", function(req, res) {
 });
 
 app.post("/register", async function(req, res) {
+  console.log("Im in register function");
   try {
     var salt = await bcrypt.genSalt();
     var hashedPassword = await bcrypt.hash(req.body.inputPassword, salt);
@@ -302,6 +336,8 @@ app.post("/register", async function(req, res) {
       });
       const query_string = 'INSERT INTO "Users" ("Name", "FamilyName", "Email", "PromoCode", "Password") VALUES ($1, $2, $3, $4, $5)';
       const values = [user.firstName, user.lastName, user.email, user.promoCode, hashedPassword];
+
+
 
       client.connect();
       client.query(query_string, values, (err, res) => {
