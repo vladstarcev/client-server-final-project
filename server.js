@@ -1,5 +1,8 @@
 //REQUIRING PACKAGES AND EXPRESS BASIC SET UP
 const express = require('express');
+const session = require('express-session');
+const cookieParser = require('cookie-parser');
+const flash = require('connect-flash');
 const bodyParser = require('body-parser');
 const request = require('request');
 const fs = require('fs');
@@ -27,6 +30,14 @@ app.use(express.static('public'));
 app.use(bodyParser.json());
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(cookieParser('secret'));
+app.use(session({
+    secret: 'secret',
+    cookie: { maxAge: 60000 },
+    resave: false,
+    saveUninitialized: false
+}));
+app.use(flash());
 require('dotenv').config();
 
 
@@ -158,7 +169,10 @@ let data = JSON.parse(rawdata);
 
 //GET REQUESTS HANDLING
 app.get("/", function (req, res) {
-    res.render("login", { recaptchaSiteKey: process.env.RECAPTCHA_SECRET_KEY_CLIENT });
+    res.render("login", {
+        recaptchaSiteKey: process.env.RECAPTCHA_SECRET_KEY_CLIENT,
+        message: req.flash('message')
+    });
 });
 
 app.get("/forgotPassword", function (req, res) {
@@ -169,7 +183,10 @@ app.get("/forgotPassword", function (req, res) {
 //     res.sendFile(__dirname + "/register.html");
 // });
 app.get("/register", function (req, res) {
-    res.render("register", { recaptchaSiteKey: process.env.RECAPTCHA_SECRET_KEY_CLIENT });
+    res.render("register", {
+        recaptchaSiteKey: process.env.RECAPTCHA_SECRET_KEY_CLIENT,
+        message: req.flash('message')
+    });
 });
 
 // app.get('/index', function(req, res) {
@@ -326,6 +343,7 @@ app.get("/main", function (req, res) {
     }
 });
 
+
 //POST REQUESTS HANDLING
 app.post("/verifyCaptcha", function (req, res) {
     // user didn't check the captcha
@@ -360,64 +378,164 @@ app.post("/verifyCaptcha", function (req, res) {
 });
 
 app.post("/register", function (req, res) {
-    console.log("Im in register function");
-    async.waterfall([
-        function (done) {
-            crypto.randomBytes(sizeOfRandomBytes, function (err, buf) {
-                var token = buf.toString('hex');
-                done(err, token);
-            });
-        },
-        function (token, done) {
-            var user = usersBeforeConfirmation.find(user => user.email === req.body.inputEmail);
 
-            if (user != null && user != undefined) {
-                console.log('This user already exists');
-                return res.redirect('/');
-            }
+    var messageWithType = [];
 
-            user = {
-                email: req.body.inputEmail,
-                password: req.body.inputPassword,
-                firstName: req.body.firstName,
-                lastName: req.body.lastName,
-                promoCode: req.body.promoCode,
-                confirmationToken: token,
-                confirmationTokenExpires: Date.now() + 3600000 * 24 // 24 hours
-            }
-
-            usersBeforeConfirmation.push(user);
-
-            done(null, token, user);
-        },
-        function (token, user, done) {
-            var smtpTransport = nodemailer.createTransport({
-                service: 'Gmail',
-                auth: {
-                    user: process.env.GMAIL_ADDRESS,
-                    pass: process.env.GMAIL_PASSWORD
-                }
-            });
-            var mailOptions = {
-                to: user.email,
-                from: process.env.GMAIL_ADDRESS,
-                subject: 'Complete Registration',
-                text: 'Please click on the following link to complete your registration process:\n\n' +
-                    'http://' + req.headers.host + '/confirmation/' + token + '\n\n'
-            };
-            smtpTransport.sendMail(mailOptions, function (err) {
-                console.log('mail sent');
-                done(err, 'done');
-            });
-        }
-    ], function (err) {
-        if (err)
-            return next(err);
-        res.redirect('/');
+    const client = new Client({
+        user: process.env.POSTGRES_USER,
+        password: process.env.POSTGRES_PASSWORD,
+        host: 'localhost',
+        database: process.env.POSTGRES_DATABASE,
+        port: process.env.POSTGRES_PORT
     });
+    const query_string = 'SELECT * FROM "Users" WHERE "Email"=$1';
+    const values = [req.body.inputEmail];
 
-    console.log('Please check your mail'); // change to flash message
-    res.redirect('/');
+    client.connect();
+    client.query(query_string, values, (err, result) => {
+        if (err) {
+            console.log(err);
+        } else {
+            if (result.rowCount != 0) {
+                messageWithType = ['danger', 'This user already registered']
+                req.flash('message', messageWithType)
+                res.redirect('/register');
+            } else {
+                if (req.body.promoCode != '' && req.body.promoCode != null) {
+                    //const promoCodeQuery = 'SELECT * FROM "PromoCode" WHERE "PromoCode"=$1';
+                    //const promoCode = [req.body.promoCode];
+                    //client.query(promoCodeQuery, promoCode, (err, result) => {
+                    //    if (err) {
+                    //        console.log(err);
+                    //    } else {
+                    //        if (result.rowCount == 0) {
+                    //            messageWithType = ['danger', "Can't register you with wrong promo code.\nPlease fill in your details with correct promo code or without promo code at all."]
+                    //            req.flash('message', messageWithType)
+                    //            res.redirect('/register');
+                    //            return;
+                    //        }
+                    //    }
+                    //});
+                    if (promoCodes.find(code => code.promoCode === req.body.promoCode) === undefined) {
+                        messageWithType = ['danger', "Can't register you with wrong promo code.\nPlease fill in your details with correct promo code or without promo code at all."]
+                        req.flash('message', messageWithType)
+                        res.redirect('/register');
+                        client.end();
+                        return;
+                    } else {
+                        async.waterfall([
+                            function (done) {
+                                crypto.randomBytes(sizeOfRandomBytes, function (err, buf) {
+                                    var token = buf.toString('hex');
+                                    done(err, token);
+                                });
+                            },
+                            function (token, done) {
+                                var user = usersBeforeConfirmation.find(userNotInDB => userNotInDB.email === req.body.inputEmail);
+
+                                user = {
+                                    email: req.body.inputEmail,
+                                    password: req.body.inputPassword,
+                                    firstName: req.body.firstName,
+                                    lastName: req.body.lastName,
+                                    promoCode: req.body.promoCode,
+                                    confirmationToken: token,
+                                    confirmationTokenExpires: Date.now() + 3600000 * 24 // 24 hours
+                                }
+
+                                usersBeforeConfirmation.push(user);
+
+                                done(null, token, user);
+                            },
+                            function (token, user, done) {
+                                var smtpTransport = nodemailer.createTransport({
+                                    service: 'Gmail',
+                                    auth: {
+                                        user: process.env.GMAIL_ADDRESS,
+                                        pass: process.env.GMAIL_PASSWORD
+                                    }
+                                });
+                                var mailOptions = {
+                                    to: user.email,
+                                    from: process.env.GMAIL_ADDRESS,
+                                    subject: 'Complete Registration',
+                                    text: 'Please click on the following link to complete your registration process:\n\n' +
+                                        'http://' + req.headers.host + '/confirmation/' + token + '\n\n'
+                                };
+                                smtpTransport.sendMail(mailOptions, function (err) {
+                                    console.log('mail sent');
+                                    done(err, 'done');
+                                });
+                            }
+                        ], function (err) {
+                            if (err)
+                                return next(err);
+                            res.redirect('/');
+                        });
+
+                        messageWithType = ['success', 'Please check your email to complete the registration process']
+                        req.flash('message', messageWithType);
+                        res.redirect('/');
+                    }
+                } else {
+                    async.waterfall([
+                        function (done) {
+                            crypto.randomBytes(sizeOfRandomBytes, function (err, buf) {
+                                var token = buf.toString('hex');
+                                done(err, token);
+                            });
+                        },
+                        function (token, done) {
+                            var user = usersBeforeConfirmation.find(userNotInDB => userNotInDB.email === req.body.inputEmail);
+
+                            user = {
+                                email: req.body.inputEmail,
+                                password: req.body.inputPassword,
+                                firstName: req.body.firstName,
+                                lastName: req.body.lastName,
+                                promoCode: req.body.promoCode,
+                                confirmationToken: token,
+                                confirmationTokenExpires: Date.now() + 3600000 * 24 // 24 hours
+                            }
+
+                            usersBeforeConfirmation.push(user);
+
+                            done(null, token, user);
+                        },
+                        function (token, user, done) {
+                            var smtpTransport = nodemailer.createTransport({
+                                service: 'Gmail',
+                                auth: {
+                                    user: process.env.GMAIL_ADDRESS,
+                                    pass: process.env.GMAIL_PASSWORD
+                                }
+                            });
+                            var mailOptions = {
+                                to: user.email,
+                                from: process.env.GMAIL_ADDRESS,
+                                subject: 'Complete Registration',
+                                text: 'Please click on the following link to complete your registration process:\n\n' +
+                                    'http://' + req.headers.host + '/confirmation/' + token + '\n\n'
+                            };
+                            smtpTransport.sendMail(mailOptions, function (err) {
+                                console.log('mail sent');
+                                done(err, 'done');
+                            });
+                        }
+                    ], function (err) {
+                        if (err)
+                            return next(err);
+                        res.redirect('/');
+                    });
+
+                    messageWithType = ['success', 'Please check your email to complete the registration process']
+                    req.flash('message', messageWithType);
+                    res.redirect('/');
+                }
+            }
+        }
+        client.end();
+    });
 });
 
 app.post('/updateDetails', function (req, res) {
@@ -468,6 +586,7 @@ app.post('/login', function (req, res) {
         database: process.env.POSTGRES_DATABASE,
         port: process.env.POSTGRES_PORT
     });
+
     const query_string = 'SELECT * FROM "Users" WHERE "Email"=$1';
     const values = [req.body.email];
 
@@ -476,111 +595,126 @@ app.post('/login', function (req, res) {
         if (err) {
             console.log(err);
         } else {
-
-            console.log("This is login route: ", result.rows);
-            temp_user = {
-                username: result.rows[0].Email,
-                firstname: result.rows[0].Name,
-                lastname: result.rows[0].FamilyName,
-                purchases: [0, 0, 0, 0]
-            }
-
-            const query_string2 = 'SELECT * FROM "Transactions" WHERE "User"=$1';
-            const values2 = [temp_user.username];
-
-            client.query(query_string2, values2, (err, result2) => {
-                if (err) {
-                    console.log(err);
-                } else {
-                    console.log("Transactions selected");
-                    console.log(result2.rows);
-                    result2.rows.forEach(item => {
-                        if (item.Product == "iPhone X") temp_user.purchases[0]++;
-                        if (item.Product == "iPhone 7") temp_user.purchases[1]++;
-                        if (item.Product == "Samsung S8") temp_user.purchases[2]++;
-                        if (item.Product == "Huawei P10") temp_user.purchases[3]++;
-                    });
-                    console.log(temp_user.purchases);
+            if (result.rowCount != 0) {
+                temp_user = {
+                    username: result.rows[0].Email,
+                    firstname: result.rows[0].Name,
+                    lastname: result.rows[0].FamilyName,
+                    purchases: [0, 0, 0, 0]
                 }
-                client.end();
-                if (bcrypt.compare(req.body.password, result.rows[0].Password)) {
-                    res.redirect("main");
-                } else
-                    res.send('Failed to login'); // change to flash message
-            });
+
+                const query_string2 = 'SELECT * FROM "Transactions" WHERE "User"=$1';
+                const values2 = [temp_user.username];
+
+                client.query(query_string2, values2, (err, result2) => {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        result2.rows.forEach(item => {
+                            if (item.Product == "iPhone X") temp_user.purchases[0]++;
+                            if (item.Product == "iPhone 7") temp_user.purchases[1]++;
+                            if (item.Product == "Samsung S8") temp_user.purchases[2]++;
+                            if (item.Product == "Huawei P10") temp_user.purchases[3]++;
+                        });
+                    }
+                    client.end();
+                    bcrypt.compare(req.body.password, result.rows[0].Password).then((result) => {
+                        if (result) {
+                            console.log("authentication successful");
+                            res.redirect("main");
+                        } else {
+                            var messageWithType = ['danger', 'Authentication failed. Wrong username or password.']
+                            req.flash('message', messageWithType)
+                            res.redirect('/');
+                        }
+                    })
+                        .catch((err) => console.error(err))
+                });
+            } else {
+                var messageWithType = ['danger', 'Authentication failed. Wrong username or password.']
+                req.flash('message', messageWithType)
+                res.redirect('/');
+            }
         }
     });
 });
 
 app.post('/forgotPassword', function (req, res, next) {
-    async.waterfall([
-        function (done) {
-            crypto.randomBytes(sizeOfRandomBytes, function (err, buf) {
-                var token = buf.toString('hex');
-                done(err, token);
-            });
-        },
-        function (token, done) {
+    var messageWithType = [];
 
-            const client = new Client({
-                user: process.env.POSTGRES_USER,
-                password: process.env.POSTGRES_PASSWORD,
-                host: 'localhost',
-                database: process.env.POSTGRES_DATABASE,
-                port: process.env.POSTGRES_PORT
-            });
-
-            const query_string = 'SELECT * FROM "Users" WHERE "Email"=$1';
-            const values = [req.body.email];
-
-            client.connect();
-            client.query(query_string, values, (err, result) => {
-                if (err) {
-                    console.log(err);
-                } else {
-                    if (result === null || result === undefined || result.length == 0) {
-                        console.log('No such user with such mail'); // change flash message
-                        res.redirect('/forgotPassword');
-                    }
-                    var user = { email: result.rows[0].Email }
-                    resetPasswordRequests.push({
-                        email: user.email,
-                        resetPasswordToken: token,
-                        resetPasswordExpires: Date.now() + 3600000 // 1 hour
-                    });
-                    client.end();
-                    done(null, token, user);
-                }
-            });
-        },
-        function (token, user, done) {
-            var smtpTransport = nodemailer.createTransport({
-                service: 'Gmail',
-                auth: {
-                    user: process.env.GMAIL_ADDRESS,
-                    pass: process.env.GMAIL_PASSWORD
-                }
-            });
-            var mailOptions = {
-                to: user.email,
-                from: process.env.GMAIL_ADDRESS,
-                subject: 'Password Reset',
-                text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
-                    'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
-                    'http://' + req.headers.host + '/reset/' + token + '\n\n' +
-                    'If you did not request this, please ignore this email and your password will remain unchanged.\n'
-            };
-            smtpTransport.sendMail(mailOptions, function (err) {
-                console.log('mail sent');
-                done(err, 'done');
-            });
-        }
-    ], function (err) {
-        if (err)
-            return next(err);
-        res.redirect('/forgotPassword');
+    const client = new Client({
+        user: process.env.POSTGRES_USER,
+        password: process.env.POSTGRES_PASSWORD,
+        host: 'localhost',
+        database: process.env.POSTGRES_DATABASE,
+        port: process.env.POSTGRES_PORT
     });
-    res.redirect('/');
+
+    const query_string = 'SELECT * FROM "Users" WHERE "Email"=$1';
+    const values = [req.body.email];
+
+    client.connect();
+    client.query(query_string, values, (err, result) => {
+        if (err) {
+            console.log(err);
+        } else {
+            if (result.rowCount == 0) {
+                messageWithType = ['danger', 'No such user with such mail']
+                req.flash('message', messageWithType)
+                res.redirect('/');
+                client.end();
+                return;
+            } else {
+                async.waterfall([
+                    function (done) {
+                        crypto.randomBytes(sizeOfRandomBytes, function (err, buf) {
+                            var token = buf.toString('hex');
+                            done(err, token);
+                        });
+                    },
+                    function (token, done) {
+                        var user = { email: result.rows[0].Email }
+                        resetPasswordRequests.push({
+                            email: user.email,
+                            resetPasswordToken: token,
+                            resetPasswordExpires: Date.now() + 3600000 // 1 hour
+                        });
+                        done(null, token, user);
+                    },
+                    function (token, user, done) {
+                        var smtpTransport = nodemailer.createTransport({
+                            service: 'Gmail',
+                            auth: {
+                                user: process.env.GMAIL_ADDRESS,
+                                pass: process.env.GMAIL_PASSWORD
+                            }
+                        });
+                        var mailOptions = {
+                            to: user.email,
+                            from: process.env.GMAIL_ADDRESS,
+                            subject: 'Password Reset',
+                            text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
+                                'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
+                                'http://' + req.headers.host + '/reset/' + token + '\n\n' +
+                                'If you did not request this, please ignore this email and your password will remain unchanged.\n'
+                        };
+                        smtpTransport.sendMail(mailOptions, function (err) {
+                            console.log('mail sent');
+                            done(err, 'done');
+                        });
+                    }
+                ], function (err) {
+                    if (err)
+                        return next(err);
+                    res.redirect('/forgotPassword');
+                });
+                messageWithType = ['success', 'Please check your mail to complete your reset password process'];
+                req.flash('message', messageWithType)
+                res.redirect('/');
+            }
+            client.end();
+        }
+    });
 });
 
 app.post("/changePassword", function (req, res) {
@@ -659,7 +793,6 @@ app.post('/reset/:token', async function (req, res) {
                 var user = { email: resetRequest.email };
                 done(null, user);
             } else {
-                console.log("Passwords do not match."); // change to flash message
                 return res.redirect('/login');;
             }
         },
@@ -680,7 +813,7 @@ app.post('/reset/:token', async function (req, res) {
                     'This is a confirmation that the password for your account ' + user.email + ' has just been changed.\n'
             };
             smtpTransport.sendMail(mailOptions, function (err) {
-                console.log('Success! Your password has been changed.');
+                console.log('Success! Password has been changed.');
                 done(err);
             });
         }

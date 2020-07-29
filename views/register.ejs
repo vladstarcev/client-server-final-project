@@ -1,5 +1,7 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
+
+
 
 <head>
 
@@ -21,6 +23,25 @@
     <!-- For the reCaptcha -->
     <script src='https://www.google.com/recaptcha/api.js' async defer></script>
 
+    <style>
+        .valid {
+            color: green;
+        }
+
+            .valid:before {
+                content: "✔ ";
+            }
+
+        /* Add a red text color and an "x" when the requirements are wrong */
+        .invalid {
+            color: red;
+        }
+
+            .invalid:before {
+                content: "✖ ";
+            }
+    </style>
+
 </head>
 
 <body class="bg-gradient-primary">
@@ -35,18 +56,24 @@
                         <div class="p-5">
                             <div class="text-center">
                                 <h1 class="h4 text-gray-900 mb-4">Create an Account!</h1>
+                                <% if (message.length > 0) { %>
+                                   <div class="alert alert-<%= message[0] %>"><%= message[1] %></div>
+                                <% } %>
                             </div>
                             <form class="user" id="registrationForm" action="/register" method="post">
                                 <div class="form-group row">
                                     <div class="col-sm-6 mb-3 mb-sm-0">
                                         <input type="text" class="form-control form-control-user" id="FirstName" placeholder="First Name" name="firstName">
+                                        <p id="FirstNameValidation" class="invalid">First name must contain only letters</p>
                                     </div>
                                     <div class="col-sm-6">
                                         <input type="text" class="form-control form-control-user" id="LastName" placeholder="Last Name" name="lastName">
+                                        <p id="LastNameValidation" class="invalid">Last name must contain only letters</p>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <input type="email" class="form-control form-control-user" id="InputEmail" placeholder="Email Address" name="inputEmail">
+                                    <p id="EmailValidation" class="invalid">Must be valid email address</p>
                                 </div>
                                 <div class="form-group row">
                                     <div class="col-sm-6 mb-3 mb-sm-0">
@@ -54,6 +81,13 @@
                                     </div>
                                     <div class="col-sm-6">
                                         <input type="password" class="form-control form-control-user" id="RepeatPassword" placeholder="Repeat Password">
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-sm-12 mb-3 mb-sm-0">
+                                            <p id="PasswordsMatch" class="invalid">The passwords must match</p>
+                                            <p id="PasswordContainsSixCharacters" class="invalid">Password must contain at least 6 characters</p>
+                                            <p id="PasswordContainsAtLeastOneDigit" class="invalid">Password must contain at least one digit</p>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -68,7 +102,7 @@
                                 <hr>
                                 <input type="submit" value="Register Account" class="btn btn-primary btn-user btn-block">
                                 <a href="/auth/facebook" class="btn btn-facebook btn-user btn-block">
-                                    <i class="fab fa-facebook-f fa-fw"></i> Register with Facebook
+                                    <i class="fab fa-facebook-f fa-fw"></i>Register with Facebook
                                 </a>
                             </form>
                             <hr>
@@ -82,12 +116,6 @@
                     </div>
                 </div>
             </div>
-            <center id="FirstNameValidation"></center>
-            <center id="LastNameValidation"></center>
-            <center id="EmailValidation"></center>
-            <center id="PasswordsMatch"></center>
-            <center id="PasswordContainsSixCharacters"></center>
-            <center id="PasswordContainsAtLeastOneDigit"></center>
         </div>
 
     </div>
@@ -106,7 +134,119 @@
     <script src="js/FrontendFunctionality.js"></script>
 
     <!--reCAPTCHA validation listener-->
-    <script>document.getElementById("registrationForm").addEventListener("submit", submitRegistrationForm);</script>
+    <!--    <script>document.getElementById("registrationForm").addEventListener("submit", submitRegistrationForm);</script>-->
+
+    <script>
+        var userFirstName = document.getElementById("FirstName");
+        var userLastName = document.getElementById("LastName");
+        var userMail = document.getElementById("InputEmail");
+        var userPassword = document.getElementById("InputPassword");
+        var confirmationPassword = document.getElementById("RepeatPassword");
+        var validationsPassed = [false, false, false, false, false, false]
+        const validationsEnum = {
+            FirstNameValidation: 0,
+            LastNameValidation: 1,
+            EmailValidation: 2,
+            PasswordContainsSixCharacters: 3,
+            PasswordContainsAtLeastOneDigit: 4,
+            PasswordsMatch: 5
+        }
+
+        function setValid(id, index) {
+            document.getElementById(id).classList.remove('invalid');
+            document.getElementById(id).classList.add('valid');
+            validationsPassed[index] = true;
+        }
+
+        function setInvalid(id, index) {
+            document.getElementById(id).classList.remove('valid');
+            document.getElementById(id).classList.add('invalid');
+            validationsPassed[index] = false;
+        }
+
+        userFirstName.onkeyup = function () {
+            var firstNameValidation = 'FirstNameValidation';
+            if (/^[a-zA-Z]+$/.test(userFirstName.value)) {
+                setValid(firstNameValidation, validationsEnum.FirstNameValidation);
+            } else {
+                setInvalid(firstNameValidation, validationsEnum.FirstNameValidation)
+            }
+        }
+
+        userLastName.onkeyup = function () {
+            var lastNameValidation = 'LastNameValidation';
+            if (/^[a-zA-Z]+$/.test(userLastName.value)) {
+                setValid(lastNameValidation, validationsEnum.LastNameValidation);
+            } else {
+                setInvalid(lastNameValidation, validationsEnum.LastNameValidation)
+            }
+        }
+
+        userMail.onkeyup = function () {
+            var emailValidation = 'EmailValidation';
+            if (userMail.validity.valid && userMail.value !== '') {
+                setValid(emailValidation, validationsEnum.EmailValidation);
+            } else {
+                setInvalid(emailValidation, validationsEnum.EmailValidation)
+            }
+        }
+
+        userPassword.onkeyup = function () {
+            var passwordContainsSixCharacters = 'PasswordContainsSixCharacters';
+            var passwordContainsAtLeastOneDigit = 'PasswordContainsAtLeastOneDigit';
+            var numbers = /[0-9]/g;
+
+            // check passord length
+            if (userPassword.value.length >= 6) {
+                setValid(passwordContainsSixCharacters, validationsEnum.PasswordContainsSixCharacters);
+            } else {
+                setInvalid(passwordContainsSixCharacters, validationsEnum.PasswordContainsSixCharacters);
+            }
+
+            // check if passowrd contains at least a single digit
+            if (userPassword.value.match(numbers)) {
+                setValid(passwordContainsAtLeastOneDigit, validationsEnum.PasswordContainsAtLeastOneDigit);
+            } else {
+                setInvalid(passwordContainsAtLeastOneDigit, validationsEnum.PasswordContainsAtLeastOneDigit);
+            }
+        }
+
+        confirmationPassword.onkeyup = function () {
+            var passwordsMatch = 'PasswordsMatch';
+
+            // check if passwords match
+            if (userPassword.value == confirmationPassword.value) {
+                setValid(passwordsMatch, validationsEnum.PasswordsMatch);
+            } else {
+                setInvalid(passwordsMatch, validationsEnum.PasswordsMatch);
+            }
+        }
+
+        // prevent from the user to going on without validating all the conditions
+        document.getElementById("registrationForm").addEventListener("submit", (event) => {
+            event.preventDefault();
+
+            const captcha = document.querySelector("#g-recaptcha-response").value;
+            var allValidationsPassed = true;
+            var validation;
+            for (validation in validationsPassed)
+                allValidationsPassed = allValidationsPassed && validation;
+
+            fetch("/verifyCaptcha", {
+                method: "POST",
+                headers: { "Content-type": "application/json" },
+                body: JSON.stringify({ captcha })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        if (allValidationsPassed)
+                            $('#registrationForm').unbind('submit').submit();
+                    }
+                    else { setError("recaptchaMessage", data.message); }
+                });
+        });
+    </script>
 </body>
 
 </html>

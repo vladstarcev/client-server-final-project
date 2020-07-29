@@ -1,3 +1,38 @@
+﻿// mark as green when the field is valid
+function setValid(id, value) {
+    var element = document.getElementById(id);
+    element.innerHTML = "✔ " + value;
+    element.setAttribute("style", "display:block; color: green;")
+}
+
+// mark as green when the field is invalid
+function setError(id, value) {
+    var element = document.getElementById(id);
+    element.innerHTML = "✖ " + value;
+    element.setAttribute("style", "display:block; color: red;")
+}
+
+/*
+// this function handles the reCAPTCHA response from server for the login page
+function submitForm(event) {
+    event.preventDefault();
+
+    const captcha = document.querySelector("#g-recaptcha-response").value;
+
+    fetch("/verifyCaptcha", {
+        method: "POST",
+        headers: { "Content-type": "application/json" },
+        body: JSON.stringify({ captcha })
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                $(this).unbind('submit').submit();
+            }
+            else { setError("recaptchaMessage", data.message); }
+        });
+}
+
 function validateRegistrationFields() {
 
     var validationsPassed = validatePasswords();
@@ -59,20 +94,6 @@ function validatePasswords() {
     return validationsPassed;
 }
 
-// mark as green when the field is valid
-function setValid(id, value) {
-    var element = document.getElementById(id);
-    element.innerHTML = "V " + value;
-    element.setAttribute("style", "display:block; color: #55A846;")
-}
-
-// mark as green when the field is invalid
-function setError(id, value) {
-    var element = document.getElementById(id);
-    element.innerHTML = "X " + value;
-    element.setAttribute("style", "display:block; color: #D71D1D;")
-}
-
 // this function handles the reCAPTCHA response from server for the registration page
 function submitRegistrationForm(event) {
     event.preventDefault();
@@ -94,23 +115,4 @@ function submitRegistrationForm(event) {
             else { setError("recaptchaMessage", data.message); }
         });
 }
-
-// this function handles the reCAPTCHA response from server for the login page
-function submitForm(event) {
-    event.preventDefault();
-
-    const captcha = document.querySelector("#g-recaptcha-response").value;
-
-    fetch("/verifyCaptcha", {
-        method: "POST",
-        headers: { "Content-type": "application/json" },
-        body: JSON.stringify({ captcha })
-    })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                    $(this).unbind('submit').submit();
-            }
-            else { setError("recaptchaMessage", data.message); }
-        });
-}
+*/

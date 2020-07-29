@@ -41,6 +41,9 @@
                                 <div class="p-5">
                                     <div class="text-center">
                                         <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
+                                        <% if (message.length > 0) { %>
+                                            <div class="alert alert-<%= message[0] %>"><%= message[1] %></div>
+                                        <% } %>
                                     </div>
                                     <form class="user" id="loginForm" action="/login" method="post">
                                         <div class="form-group">
@@ -55,12 +58,14 @@
                                                 <label class="custom-control-label" for="customCheck">Remember Me</label>
                                             </div>
                                         </div>
-                                        <center class="g-recaptcha" data-sitekey="<%= recaptchaSiteKey %>"></center>
-                                        <center id="recaptchaMessage"></center>
+                                        <div>
+                                            <center class="g-recaptcha" data-sitekey="<%= recaptchaSiteKey %>"></center>
+                                            <center id="recaptchaMessage"></center>
+                                        </div>
                                         <hr>
                                         <input type="submit" value="Login" class="btn btn-primary btn-user btn-block">
                                         <a href="/auth/facebook" class="btn btn-facebook btn-user btn-block">
-                                            <i class="fab fa-facebook-f fa-fw"></i> Login with Facebook
+                                            <i class="fab fa-facebook-f fa-fw"></i>Login with Facebook
                                         </a>
                                     </form>
                                     <hr>
@@ -96,7 +101,27 @@
     <script src="js/FrontendFunctionality.js"></script>
 
     <!--reCAPTCHA validation listener-->
-    <script>document.getElementById("loginForm").addEventListener("submit", submitForm);</script>
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", (event) => {
+            event.preventDefault();
+
+            const captcha = document.querySelector("#g-recaptcha-response").value;
+
+            fetch("/verifyCaptcha", {
+                method: "POST",
+                headers: { "Content-type": "application/json" },
+                body: JSON.stringify({ captcha })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        $('#loginForm').unbind('submit').submit();
+                    }
+                    else { setError("recaptchaMessage", data.message); }
+                });
+        });
+
+    </script>
 
 </body>
 
