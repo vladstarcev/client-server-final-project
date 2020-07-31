@@ -63,8 +63,6 @@ var promoCodes = [{
 ];
 var temp_user;
 
-
-
 // LOGIN WITH FACEBOOK
 passport.use(new FacebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID,
@@ -97,7 +95,8 @@ passport.use(new FacebookStrategy({
                     username: profile.emails[0].value,
                     firstname: profile.name.givenName,
                     lastname: profile.name.familyName,
-                    purchases: [0, 0, 0, 0]
+                    purchases: [0, 0, 0, 0],
+                    rememberMe: true
                 }
 
                 const query_string2 = 'SELECT * FROM "Transactions" WHERE "User"=$1';
@@ -127,7 +126,8 @@ passport.use(new FacebookStrategy({
                     username: profile.emails[0].value,
                     firstname: profile.name.givenName,
                     lastname: profile.name.familyName,
-                    purchases: [0, 0, 0, 0]
+                    purchases: [0, 0, 0, 0],
+                    rememberMe: true
                 }
 
                 bcrypt.hash(profile.id, saltRounds, function (err, hash) {
@@ -164,15 +164,16 @@ let rawdata = fs.readFileSync('cell_phone_data.json');
 let data = JSON.parse(rawdata);
 
 
-
-
-
 //GET REQUESTS HANDLING
 app.get("/", function (req, res) {
-    res.render("login", {
-        recaptchaSiteKey: process.env.RECAPTCHA_SECRET_KEY_CLIENT,
-        message: req.flash('message')
-    });
+    if (temp_user && temp_user.rememberMe) {
+        res.redirect('main');
+    } else {
+        res.render("login", {
+            recaptchaSiteKey: process.env.RECAPTCHA_SECRET_KEY_CLIENT,
+            message: req.flash('message')
+        });
+    }
 });
 
 app.get("/forgotPassword", function (req, res) {
@@ -305,7 +306,8 @@ app.get('/confirmation/:token', async function (req, res) {
             username: user.email,
             firstname: user.firstName,
             lastname: user.lastName,
-            purchases: [0, 0, 0, 0]
+            purchases: [0, 0, 0, 0],
+            rememberMe: true
         }
 
         usersBeforeConfirmation = usersBeforeConfirmation.filter(userBeforeConfirmation => userBeforeConfirmation !== user); // remove the user from this dummy db
@@ -596,13 +598,23 @@ app.post('/login', function (req, res) {
             console.log(err);
         } else {
             if (result.rowCount != 0) {
-                temp_user = {
-                    username: result.rows[0].Email,
-                    firstname: result.rows[0].Name,
-                    lastname: result.rows[0].FamilyName,
-                    purchases: [0, 0, 0, 0]
+                if (req.body['rememberMe'] == undefined) {
+                    temp_user = {
+                        username: result.rows[0].Email,
+                        firstname: result.rows[0].Name,
+                        lastname: result.rows[0].FamilyName,
+                        purchases: [0, 0, 0, 0],
+                        rememberMe: false
+                    }
+                } else {
+                    temp_user = {
+                        username: result.rows[0].Email,
+                        firstname: result.rows[0].Name,
+                        lastname: result.rows[0].FamilyName,
+                        purchases: [0, 0, 0, 0],
+                        rememberMe: true
+                    }
                 }
-
                 const query_string2 = 'SELECT * FROM "Transactions" WHERE "User"=$1';
                 const values2 = [temp_user.username];
 
@@ -845,7 +857,8 @@ app.post('/reset/:token', async function (req, res) {
                     username: result.rows[0].Email,
                     firstname: result.rows[0].Name,
                     lastname: result.rows[0].FamilyName,
-                    purchases: [0, 0, 0, 0]
+                    purchases: [0, 0, 0, 0],
+                    rememberMe: true
                 }
 
                 const select_transaction_query_string = 'SELECT * FROM "Transactions" WHERE "User"=$1';
