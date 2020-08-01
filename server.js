@@ -75,7 +75,7 @@ passport.use(new FacebookStrategy({
         const client = new Client({
             user: process.env.POSTGRES_USER,
             password: process.env.POSTGRES_PASSWORD,
-            host: 'localhost',
+            host: process.env.POSTGRES_HOST,
             database: process.env.POSTGRES_DATABASE,
             port: process.env.POSTGRES_PORT
         });
@@ -289,7 +289,7 @@ app.get('/confirmation/:token', async function (req, res) {
         const client = new Client({
             user: process.env.POSTGRES_USER,
             password: process.env.POSTGRES_PASSWORD,
-            host: 'localhost',
+            host: process.env.POSTGRES_HOST,
             database: process.env.POSTGRES_DATABASE,
             port: process.env.POSTGRES_PORT
         });
@@ -386,7 +386,7 @@ app.post("/register", function (req, res) {
     const client = new Client({
         user: process.env.POSTGRES_USER,
         password: process.env.POSTGRES_PASSWORD,
-        host: 'localhost',
+        host: process.env.POSTGRES_HOST,
         database: process.env.POSTGRES_DATABASE,
         port: process.env.POSTGRES_PORT
     });
@@ -544,7 +544,7 @@ app.post('/updateDetails', function (req, res) {
     const client = new Client({
         user: process.env.POSTGRES_USER,
         password: process.env.POSTGRES_PASSWORD,
-        host: 'localhost',
+        host: process.env.POSTGRES_HOST,
         database: process.env.POSTGRES_DATABASE,
         port: process.env.POSTGRES_PORT
     });
@@ -584,7 +584,7 @@ app.post('/login', function (req, res) {
     const client = new Client({
         user: process.env.POSTGRES_USER,
         password: process.env.POSTGRES_PASSWORD,
-        host: 'localhost',
+        host: process.env.POSTGRES_HOST,
         database: process.env.POSTGRES_DATABASE,
         port: process.env.POSTGRES_PORT
     });
@@ -657,7 +657,7 @@ app.post('/forgotPassword', function (req, res, next) {
     const client = new Client({
         user: process.env.POSTGRES_USER,
         password: process.env.POSTGRES_PASSWORD,
-        host: 'localhost',
+        host: process.env.POSTGRES_HOST,
         database: process.env.POSTGRES_DATABASE,
         port: process.env.POSTGRES_PORT
     });
@@ -734,7 +734,7 @@ app.post("/changePassword", function (req, res) {
     const client = new Client({
         user: process.env.POSTGRES_USER,
         password: process.env.POSTGRES_PASSWORD,
-        host: 'localhost',
+        host: process.env.POSTGRES_HOST,
         database: process.env.POSTGRES_DATABASE,
         port: process.env.POSTGRES_PORT
     });
@@ -841,7 +841,7 @@ app.post('/reset/:token', async function (req, res) {
         const client = new Client({
             user: process.env.POSTGRES_USER,
             password: process.env.POSTGRES_PASSWORD,
-            host: 'localhost',
+            host: process.env.POSTGRES_HOST,
             database: process.env.POSTGRES_DATABASE,
             port: process.env.POSTGRES_PORT
         });
@@ -900,7 +900,7 @@ app.post("/buyCellphone", function (req, res) {
     const client = new Client({
         user: process.env.POSTGRES_USER,
         password: process.env.POSTGRES_PASSWORD,
-        host: 'localhost',
+        host: process.env.POSTGRES_HOST,
         database: process.env.POSTGRES_DATABASE,
         port: process.env.POSTGRES_PORT
     });
@@ -956,6 +956,7 @@ app.post("/buyCellphone", function (req, res) {
 
 
 //SERVER SET UP ON PORT 3000
-app.listen(3000, function () {
+const port = process.env.PORT || 3000;
+app.listen(port, function () {
     console.log("Server is running on port 3000");
 });
