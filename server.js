@@ -404,26 +404,80 @@ app.post("/register", function (req, res) {
                 res.redirect('/register');
             } else {
                 if (req.body.promoCode != '' && req.body.promoCode != null) {
-                    //const promoCodeQuery = 'SELECT * FROM "PromoCode" WHERE "PromoCode"=$1';
-                    //const promoCode = [req.body.promoCode];
-                    //client.query(promoCodeQuery, promoCode, (err, result) => {
-                    //    if (err) {
-                    //        console.log(err);
-                    //    } else {
-                    //        if (result.rowCount == 0) {
-                    //            messageWithType = ['danger', "Can't register you with wrong promo code.\nPlease fill in your details with correct promo code or without promo code at all."]
-                    //            req.flash('message', messageWithType)
-                    //            res.redirect('/register');
-                    //            return;
-                    //        }
-                    //    }
-                    //});
-                    if (promoCodes.find(code => code.promoCode === req.body.promoCode) === undefined) {
-                        messageWithType = ['danger', "Can't register you with wrong promo code.\nPlease fill in your details with correct promo code or without promo code at all."]
-                        req.flash('message', messageWithType)
-                        res.redirect('/register');
-                        client.end();
-                        return;
+                    const promoCodeQuery = 'SELECT * FROM "PromoCode" WHERE "PromoCode"=$1';
+                    const promoCode = [req.body.promoCode];
+                    client.query(promoCodeQuery, promoCode, (err, result) => {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            if (result.rowCount == 0) {
+                                messageWithType = ['danger', "Can't register you with wrong promo code.\nPlease fill in your details with correct promo code or without promo code at all."]
+                                req.flash('message', messageWithType)
+                                res.redirect('/register');
+                                return;
+                            } else {
+                                async.waterfall([
+                                    function (done) {
+                                        crypto.randomBytes(sizeOfRandomBytes, function (err, buf) {
+                                            var token = buf.toString('hex');
+                                            done(err, token);
+                                        });
+                                    },
+                                    function (token, done) {
+                                        var user = usersBeforeConfirmation.find(userNotInDB => userNotInDB.email === req.body.inputEmail);
+
+                                        user = {
+                                            email: req.body.inputEmail,
+                                            password: req.body.inputPassword,
+                                            firstName: req.body.firstName,
+                                            lastName: req.body.lastName,
+                                            promoCode: req.body.promoCode,
+                                            confirmationToken: token,
+                                            confirmationTokenExpires: Date.now() + 3600000 * 24 // 24 hours
+                                        }
+
+                                        usersBeforeConfirmation.push(user);
+
+                                        done(null, token, user);
+                                    },
+                                    function (token, user, done) {
+                                        var smtpTransport = nodemailer.createTransport({
+                                            service: 'Gmail',
+                                            auth: {
+                                                user: process.env.GMAIL_ADDRESS,
+                                                pass: process.env.GMAIL_PASSWORD
+                                            }
+                                        });
+                                        var mailOptions = {
+                                            to: user.email,
+                                            from: process.env.GMAIL_ADDRESS,
+                                            subject: 'Complete Registration',
+                                            text: 'Please click on the following link to complete your registration process:\n\n' +
+                                                'http://' + req.headers.host + '/confirmation/' + token + '\n\n'
+                                        };
+                                        smtpTransport.sendMail(mailOptions, function (err) {
+                                            console.log('mail sent');
+                                            done(err, 'done');
+                                        });
+                                    }
+                                ], function (err) {
+                                    if (err)
+                                        return next(err);
+                                    res.redirect('/');
+                                });
+
+                                messageWithType = ['success', 'Please check your email to complete the registration process']
+                                req.flash('message', messageWithType);
+                                res.redirect('/');
+                            }
+                        }
+                    });
+                    //if (promoCodes.find(code => code.promoCode === req.body.promoCode) === undefined) {
+                    //    messageWithType = ['danger', "Can't register you with wrong promo code.\nPlease fill in your details with correct promo code or without promo code at all."]
+                    //    req.flash('message', messageWithType)
+                    //    res.redirect('/register');
+                    //    client.end();
+                    //    return;
                     } else {
                         async.waterfall([
                             function (done) {
@@ -479,63 +533,64 @@ app.post("/register", function (req, res) {
                         req.flash('message', messageWithType);
                         res.redirect('/');
                     }
-                } else {
-                    async.waterfall([
-                        function (done) {
-                            crypto.randomBytes(sizeOfRandomBytes, function (err, buf) {
-                                var token = buf.toString('hex');
-                                done(err, token);
-                            });
-                        },
-                        function (token, done) {
-                            var user = usersBeforeConfirmation.find(userNotInDB => userNotInDB.email === req.body.inputEmail);
+            } 
+            //else {
+            //        async.waterfall([
+            //            function (done) {
+            //                crypto.randomBytes(sizeOfRandomBytes, function (err, buf) {
+            //                    var token = buf.toString('hex');
+            //                    done(err, token);
+            //                });
+            //            },
+            //            function (token, done) {
+            //                var user = usersBeforeConfirmation.find(userNotInDB => userNotInDB.email === req.body.inputEmail);
 
-                            user = {
-                                email: req.body.inputEmail,
-                                password: req.body.inputPassword,
-                                firstName: req.body.firstName,
-                                lastName: req.body.lastName,
-                                promoCode: req.body.promoCode,
-                                confirmationToken: token,
-                                confirmationTokenExpires: Date.now() + 3600000 * 24 // 24 hours
-                            }
+            //                user = {
+            //                    email: req.body.inputEmail,
+            //                    password: req.body.inputPassword,
+            //                    firstName: req.body.firstName,
+            //                    lastName: req.body.lastName,
+            //                    promoCode: req.body.promoCode,
+            //                    confirmationToken: token,
+            //                    confirmationTokenExpires: Date.now() + 3600000 * 24 // 24 hours
+            //                }
 
-                            usersBeforeConfirmation.push(user);
+            //                usersBeforeConfirmation.push(user);
 
-                            done(null, token, user);
-                        },
-                        function (token, user, done) {
-                            var smtpTransport = nodemailer.createTransport({
-                                service: 'Gmail',
-                                auth: {
-                                    user: process.env.GMAIL_ADDRESS,
-                                    pass: process.env.GMAIL_PASSWORD
-                                }
-                            });
-                            var mailOptions = {
-                                to: user.email,
-                                from: process.env.GMAIL_ADDRESS,
-                                subject: 'Complete Registration',
-                                text: 'Please click on the following link to complete your registration process:\n\n' +
-                                    'http://' + req.headers.host + '/confirmation/' + token + '\n\n'
-                            };
-                            smtpTransport.sendMail(mailOptions, function (err) {
-                                console.log('mail sent');
-                                done(err, 'done');
-                            });
-                        }
-                    ], function (err) {
-                        if (err)
-                            return next(err);
-                        res.redirect('/');
-                    });
+            //                done(null, token, user);
+            //            },
+            //            function (token, user, done) {
+            //                var smtpTransport = nodemailer.createTransport({
+            //                    service: 'Gmail',
+            //                    auth: {
+            //                        user: process.env.GMAIL_ADDRESS,
+            //                        pass: process.env.GMAIL_PASSWORD
+            //                    }
+            //                });
+            //                var mailOptions = {
+            //                    to: user.email,
+            //                    from: process.env.GMAIL_ADDRESS,
+            //                    subject: 'Complete Registration',
+            //                    text: 'Please click on the following link to complete your registration process:\n\n' +
+            //                        'http://' + req.headers.host + '/confirmation/' + token + '\n\n'
+            //                };
+            //                smtpTransport.sendMail(mailOptions, function (err) {
+            //                    console.log('mail sent');
+            //                    done(err, 'done');
+            //                });
+            //            }
+            //        ], function (err) {
+            //            if (err)
+            //                return next(err);
+            //            res.redirect('/');
+            //        });
 
-                    messageWithType = ['success', 'Please check your email to complete the registration process']
-                    req.flash('message', messageWithType);
-                    res.redirect('/');
-                }
+            //        messageWithType = ['success', 'Please check your email to complete the registration process']
+            //        req.flash('message', messageWithType);
+            //        res.redirect('/');
+            //    }
             }
-        }
+        //}
         client.end();
     });
 });
