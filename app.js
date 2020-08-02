@@ -659,7 +659,7 @@ app.post('/login', function (req, res) {
     });
 });
 
-app.post('/forgotPassword', function (req, res, next) {
+app.post('/forgotPassword', function (req, res) {
     var messageWithType = [];
 
     const client = new Client({
@@ -689,6 +689,8 @@ app.post('/forgotPassword', function (req, res, next) {
                     function (done) {
                         crypto.randomBytes(sizeOfRandomBytes, function (err, buf) {
                             var token = buf.toString('hex');
+                            if (err)
+                                console.log(err);
                             done(err, token);
                         });
                     },
@@ -699,6 +701,7 @@ app.post('/forgotPassword', function (req, res, next) {
                             resetPasswordToken: token,
                             resetPasswordExpires: Date.now() + 3600000 // 1 hour
                         });
+                        console.log(resetPasswordRequests);
                         done(null, token, user);
                     },
                     function (token, user, done) {
@@ -721,13 +724,14 @@ app.post('/forgotPassword', function (req, res, next) {
                         smtpTransport.sendMail(mailOptions, function (err) {
                             if (err)
                                 console.log(err);
-                            console.log('mail sent');
+                            else
+                                console.log('mail sent');
                             done(err, 'done');
                         });
                     }
                 ], function (err) {
-                        if (err)
-                            console.log(err);
+                    if (err)
+                        console.log(err);
                 });
                 messageWithType = ['success', 'Please check your mail to complete your reset password process'];
                 req.flash('message', messageWithType)
