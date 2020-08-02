@@ -4,7 +4,6 @@ const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const flash = require('connect-flash');
 const bodyParser = require('body-parser');
-const request = require('request');
 const fs = require('fs');
 const ejs = require('ejs');
 const bcrypt = require('bcrypt');
