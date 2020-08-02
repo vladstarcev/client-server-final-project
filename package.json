@@ -2,8 +2,7 @@
   "title": "SB Admin 2",
   "name": "startbootstrap-sb-admin-2",
   "version": "4.0.7",
-  "scripts": {
-  },
+  "scripts": {},
   "description": "An open source Bootstrap 4 admin theme.",
   "keywords": [
     "css",
@@ -49,7 +48,8 @@
     "nodemon": "^2.0.4",
     "passport": "^0.4.1",
     "passport-facebook": "^3.0.0",
-    "pg": "^8.2.1"
+    "pg": "^8.2.1",
+    "request": "^2.88.2"
   },
   "devDependencies": {
     "browser-sync": "^2.26.10",
