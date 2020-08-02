@@ -949,18 +949,40 @@ app.post("/buyCellphone", function (req, res) {
             client.connect();
             client.query(query_string, values, (err, res) => {
                 console.log(err, res);
-                client.end();
 
+                var smtpTransport = nodemailer.createTransport({
+                    service: 'Gmail',
+                    auth: {
+                        user: process.env.GMAIL_ADDRESS,
+                        pass: process.env.GMAIL_PASSWORD
+                    }
+                });
+
+                var mailOptions = {
+                    to: temp_user.username,
+                    from: process.env.GMAIL_ADDRESS,
+                    subject: 'Purchase Confirmed',
+                    text: 'Your order for Cellphone: ' + userInput.phone + ', Model: ' + userInput.model + 'was placed.\n' +
+                        'We will ship your order within 24 hours.\n' + 
+                        'Thank you for buying! Hope you will enjoy your order!'
+                };
+                smtpTransport.sendMail(mailOptions, function (err) {
+                    if (err)
+                        console.log(err);
+                    else
+                        console.log('mail sent');
+                    done(err, 'done');
+                });
+                client.end();
             });
             res.redirect("pconfirm");
-
         });
     });
 });
 
 
-//SERVER SET UP ON PORT 3000
+//SERVER SET UP ON PORT 3000 ON LOCALHOST
 const port = process.env.PORT || 3000;
 app.listen(port, function () {
-    console.log("Server is running on port" + port);
+    console.log("Server is running on port " + port);
 });
