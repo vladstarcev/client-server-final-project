@@ -525,8 +525,9 @@ app.post("/register", function (req, res) {
                             });
                         }
                     ], function (err) {
-                        if (err)
-                            return next(err);
+                            if (err) {
+                                console.log(err)
+                            }
                         res.redirect('/');
                     });
 
