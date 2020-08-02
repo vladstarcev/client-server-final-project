@@ -719,14 +719,15 @@ app.post('/forgotPassword', function (req, res, next) {
                                 'If you did not request this, please ignore this email and your password will remain unchanged.\n'
                         };
                         smtpTransport.sendMail(mailOptions, function (err) {
+                            if (err)
+                                console.log(err);
                             console.log('mail sent');
                             done(err, 'done');
                         });
                     }
                 ], function (err) {
-                    if (err)
-                        return next(err);
-                    res.redirect('/forgotPassword');
+                        if (err)
+                            console.log(err);
                 });
                 messageWithType = ['success', 'Please check your mail to complete your reset password process'];
                 req.flash('message', messageWithType)
