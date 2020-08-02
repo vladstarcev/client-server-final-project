@@ -465,15 +465,17 @@ app.post("/register", function (req, res) {
                                         'http://' + req.headers.host + '/confirmation/' + token + '\n\n'
                                 };
                                 smtpTransport.sendMail(mailOptions, function (err) {
+                                    console.log(err);
                                     console.log('mail sent');
                                     done(err, 'done');
                                 });
                             }
-                        ], function (err) {
-                            if (err)
-                                return next(err);
-                            res.redirect('/');
-                        });
+                        ],
+                            function (err) {
+                                if (err) {
+                                    console.log(err)
+                                }
+                            });
 
                         messageWithType = ['success', 'Please check your email to complete the registration process']
                         req.flash('message', messageWithType);
@@ -484,6 +486,8 @@ app.post("/register", function (req, res) {
                         function (done) {
                             crypto.randomBytes(sizeOfRandomBytes, function (err, buf) {
                                 var token = buf.toString('hex');
+                                if (err)
+                                    console.log(err);
                                 done(err, token);
                             });
                         },
@@ -501,6 +505,8 @@ app.post("/register", function (req, res) {
                             }
 
                             usersBeforeConfirmation.push(user);
+
+                            console.log(usersBeforeConfirmation);
 
                             done(null, token, user);
                         },
@@ -520,15 +526,16 @@ app.post("/register", function (req, res) {
                                     'http://' + req.headers.host + '/confirmation/' + token + '\n\n'
                             };
                             smtpTransport.sendMail(mailOptions, function (err) {
+                                if (err)
+                                    console.log(err)
                                 console.log('mail sent');
                                 done(err, 'done');
                             });
                         }
                     ], function (err) {
-                            if (err) {
-                                console.log(err)
-                            }
-                        res.redirect('/');
+                        if (err) {
+                            console.log(err)
+                        }
                     });
 
                     messageWithType = ['success', 'Please check your email to complete the registration process']
