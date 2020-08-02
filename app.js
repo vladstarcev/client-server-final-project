@@ -404,20 +404,6 @@ app.post("/register", function (req, res) {
                 res.redirect('/register');
             } else {
                 if (req.body.promoCode != '' && req.body.promoCode != null) {
-                    //const promoCodeQuery = 'SELECT * FROM "PromoCode" WHERE "PromoCode"=$1';
-                    //const promoCode = [req.body.promoCode];
-                    //client.query(promoCodeQuery, promoCode, (err, result) => {
-                    //    if (err) {
-                    //        console.log(err);
-                    //    } else {
-                    //        if (result.rowCount == 0) {
-                    //            messageWithType = ['danger', "Can't register you with wrong promo code.\nPlease fill in your details with correct promo code or without promo code at all."]
-                    //            req.flash('message', messageWithType)
-                    //            res.redirect('/register');
-                    //            return;
-                    //        }
-                    //    }
-                    //});
                     if (promoCodes.find(code => code.promoCode === req.body.promoCode) === undefined) {
                         messageWithType = ['danger', "Can't register you with wrong promo code.\nPlease fill in your details with correct promo code or without promo code at all."]
                         req.flash('message', messageWithType)
