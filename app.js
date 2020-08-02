@@ -962,8 +962,8 @@ app.post("/buyCellphone", function (req, res) {
                     to: temp_user.username,
                     from: process.env.GMAIL_ADDRESS,
                     subject: 'Purchase Confirmed',
-                    text: 'Your order for Cellphone: ' + userInput.phone + ', Model: ' + userInput.model + 'was placed.\n' +
-                        'We will ship your order within 24 hours.\n' + 
+                    text: 'Your order for Cellphone: ' + t.product + ', Model: ' + t.model + ' was placed.\n' +
+                        'We will ship your order within 24 hours.\n\n' + 
                         'Thank you for buying! Hope you will enjoy your order!'
                 };
                 smtpTransport.sendMail(mailOptions, function (err) {
@@ -971,7 +971,6 @@ app.post("/buyCellphone", function (req, res) {
                         console.log(err);
                     else
                         console.log('mail sent');
-                    done(err, 'done');
                 });
                 client.end();
             });
