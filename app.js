@@ -557,7 +557,10 @@ app.post('/updateDetails', function (req, res) {
         port: process.env.POSTGRES_PORT
     });
     const query_string = 'UPDATE "Users" SET ("Name","FamilyName","PhoneNumber","Country","City","Street","ZipCode") = ($1,$2,$3,$4,$5,$6,$7) WHERE "Email"=$8';
+    const userMail = temp_user.username;
     const values = [req.body.firstName, req.body.lastName, req.body.phone, req.body.country, req.body.city, req.body.street, req.body.zip, temp_user.username];
+
+
 
     client.connect();
     client.query(query_string, values, (err, result) => {
@@ -565,6 +568,8 @@ app.post('/updateDetails', function (req, res) {
             console.log(err);
         } else {
             console.log(result);
+            temp_user.firstname = req.body.firstName;
+            temp_user.lastname = req.body.lastName;
             res.redirect("main");
         }
         client.end();
