@@ -67,7 +67,7 @@ var temp_user;
 passport.use(new FacebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID,
     clientSecret: process.env.FACEBOOK_APP_SECRET,
-    callbackURL: 'http://localhost:3000/auth/facebook/callback',
+    callbackURL: process.env.FACEBOOK_SUCCESS_REDIRECT,
     //callbackURL: 'http://localhost:3000/main',
     profileFields: ['emails', 'name']
 },
@@ -966,5 +966,5 @@ app.post("/buyCellphone", function (req, res) {
 //SERVER SET UP ON PORT 3000
 const port = process.env.PORT || 3000;
 app.listen(port, function () {
-    console.log("Server is running on port 3000");
+    console.log("Server is running on port" + port);
 });
