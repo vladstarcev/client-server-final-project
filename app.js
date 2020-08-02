@@ -219,7 +219,7 @@ app.get("/profile", function (req, res) {
     const myclient = new Client({
         user: process.env.POSTGRES_USER,
         password: process.env.POSTGRES_PASSWORD,
-        host: 'localhost',
+        host: process.env.POSTGRES_HOST,
         database: process.env.POSTGRES_DATABASE,
         port: process.env.POSTGRES_PORT
     });
