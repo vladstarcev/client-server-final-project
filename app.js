@@ -180,19 +180,12 @@ app.get("/forgotPassword", function (req, res) {
     res.render("forgot-password", { recaptchaSiteKey: process.env.RECAPTCHA_SECRET_KEY_CLIENT });
 });
 
-// app.get("/register", function (req, res) {
-//     res.sendFile(__dirname + "/register.html");
-// });
 app.get("/register", function (req, res) {
     res.render("register", {
         recaptchaSiteKey: process.env.RECAPTCHA_SECRET_KEY_CLIENT,
         message: req.flash('message')
     });
 });
-
-// app.get('/index', function(req, res) {
-//   res.sendFile(__dirname + '/index.html');
-// });
 
 app.get("/buyPc", function (req, res) {
     res.render("buyPc", {
@@ -261,10 +254,12 @@ app.get('/reset/:token', function (req, res) {
     var resetRequest = resetPasswordRequests.find(request => request.resetPasswordToken === req.params.token);
     if (!resetRequest) {
         console.log('Password reset token is invalid.');
-        return res.redirect('/forgotPassword');
+        res.redirect('/forgotPassword');
+        return;
     } else if (resetRequest.resetPasswordExpires < Date.now()) {
         console.log('Password reset token has expired.');
-        return res.redirect('/forgotPassword');
+        res.redirect('/forgotPassword');
+        return;
     }
 
     res.render('reset', { token: req.params.token });
@@ -275,10 +270,12 @@ app.get('/confirmation/:token', async function (req, res) {
     var user = usersBeforeConfirmation.find(user => user.confirmationToken === req.params.token);
     if (!user) {
         console.log('Confirmation token is invalid.');
-        return res.redirect('/');
+        res.redirect('/');
+        return;
     } else if (user.confirmationTokenExpires < Date.now()) {
         console.log('Confirmation token has expired.');
-        return res.redirect('/');
+        res.redirect('/');
+        return;
     }
 
     // register user to data base
@@ -398,7 +395,7 @@ app.post("/register", function (req, res) {
         if (err) {
             console.log(err);
         } else {
-            if (result.rowCount != 0) {
+            if (result.rowCount != 0) { // check if user already registered
                 messageWithType = ['danger', 'This user already registered']
                 req.flash('message', messageWithType)
                 res.redirect('/register');
@@ -410,7 +407,8 @@ app.post("/register", function (req, res) {
                         res.redirect('/register');
                         client.end();
                         return;
-                    } else {
+                    }
+                    else {
                         async.waterfall([
                             function (done) {
                                 crypto.randomBytes(sizeOfRandomBytes, function (err, buf) {
@@ -467,7 +465,7 @@ app.post("/register", function (req, res) {
                         req.flash('message', messageWithType);
                         res.redirect('/');
                     }
-                } else {
+                } else { // if there's no promo code at all
                     async.waterfall([
                         function (done) {
                             crypto.randomBytes(sizeOfRandomBytes, function (err, buf) {
@@ -545,8 +543,6 @@ app.post('/updateDetails', function (req, res) {
     const query_string = 'UPDATE "Users" SET ("Name","FamilyName","PhoneNumber","Country","City","Street","ZipCode") = ($1,$2,$3,$4,$5,$6,$7) WHERE "Email"=$8';
     const userMail = temp_user.username;
     const values = [req.body.firstName, req.body.lastName, req.body.phone, req.body.country, req.body.city, req.body.street, req.body.zip, temp_user.username];
-
-
 
     client.connect();
     client.query(query_string, values, (err, result) => {
